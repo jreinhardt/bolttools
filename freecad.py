@@ -143,6 +143,8 @@ class FreeCADData(BackendData):
 
 class FreeCADExporter(BackendExporter):
 	def write_output(self,repo):
+		if repo.freecad is None:
+			raise MalformedRepositoryError("Can not export: FreeCAD Backend is not active")
 		freecad = repo.freecad
 
 		repo_path = freecad.repo_root

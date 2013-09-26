@@ -121,6 +121,11 @@ class TestFreeCADGeneration(unittest.TestCase):
 	def test_data_init(self):
 		scad = freecad.FreeCADData("test_repos/small")
 
+	def test_fcstd(self):
+		repo = blt_parser.BOLTSRepository("test_repos/fcstd")
+		self.assertEqual(len(repo.freecad.getbase),2)
+		freecad.FreeCADExporter().write_output(repo)
+
 class TestHTMLGeneration(unittest.TestCase):
 	def test_data_init(self):
 		html_data = html.HTMLData("test_repos/small")

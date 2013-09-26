@@ -31,6 +31,8 @@ class HTMLData(BackendData):
 
 class HTMLExporter(BackendExporter):
 	def write_output(self,repo):
+		if repo.html is None:
+			raise MalformedRepositoryError("Can not export: HTML Backend is not active")
 		html = repo.html
 
 		#load templates
