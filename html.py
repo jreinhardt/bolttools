@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from common import BackendData, BackendExporter
+from common import BackendData, BackendExporter, html_table
 import freecad,openscad
 from os import listdir,makedirs
 import re
@@ -35,9 +35,9 @@ class HTMLExporter(BackendExporter):
 
 		#load templates
 		self.templates = {}
-		for filename in listdir(template_root):
+		for filename in listdir(html.template_root):
 			name = splitext(basename(filename))[0]
-			template_path = join(template_root,filename)
+			template_path = join(html.template_root,filename)
 			self.templates[name] = string.Template(open(template_path).read())
 
 		#clear output and copy files
@@ -192,7 +192,7 @@ class HTMLExporter(BackendExporter):
 				openscad_props = []
 				if isinstance(base,openscad.BaseModule):
 					prop_row(openscad_props,"Type","Module")
-				elif isinstance(base,openscad.BaseFcstd):
+				elif isinstance(base,openscad.BaseSTL):
 					prop_row(openscad_props,"Type","STL file")
 				for mail,name in zip(base.author_mails,base.author_names):
 					prop_row(openscad_props,"Author","<a href='mailto:%s'>%s</a>" % (mail,name))

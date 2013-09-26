@@ -11,20 +11,14 @@
 
 <div id="content">
   <div class="inner-content">
-    by: $author<br>
-    license: $license<br>
-    part of collection: $collection<br>
-    identical to: $identical <br>
-    status: $status<br>
-    standard: $org<br>
-    url: $url<br>
-    replaces: $replaces<br>
-    replacedby: $replacedby<br>
+    <table>
+      $properties
+    </table>
   </div>
 
   <div class="inner-content">
     <h1>Drawing</h1>
-    <img src="../../drawings/$drawing.png"/>
+    <img width="100%" src="../drawings/$drawing"/>
   </div>
 
   <div class="inner-content">
@@ -33,9 +27,24 @@
   </div>
 
   <div class="inner-content">
+    <h1>FreeCAD</h1>
+    <table class="table">
+      $freecad
+    </table>
+  </div>
+
+  <div class="inner-content">
+    <h1>OpenSCAD</h1>
+    <table class="table">
+      $openscad
+    </table>
+      $openscadincantation
+  </div>
+
+  <div class="inner-content">
     <h1>Dimensions</h1>
     <table class="table">
-      $table
+      $dimensions
     </table>
   </div>
 </div>

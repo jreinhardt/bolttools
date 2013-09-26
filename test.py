@@ -1,6 +1,5 @@
 import blt_parser
-import openscad
-import freecad
+import openscad, freecad, html
 import unittest
 from errors import *
 
@@ -121,6 +120,17 @@ class TestOpenSCADGeneration(unittest.TestCase):
 class TestFreeCADGeneration(unittest.TestCase):
 	def test_data_init(self):
 		scad = freecad.FreeCADData("test_repos/small")
+
+class TestHTMLGeneration(unittest.TestCase):
+	def test_data_init(self):
+		html_data = html.HTMLData("test_repos/small")
+	def test_export(self):
+		#small
+		repo = blt_parser.BOLTSRepository("test_repos/small")
+		html.HTMLExporter().write_output(repo)
+		#stl
+		repo = blt_parser.BOLTSRepository("test_repos/stl")
+		html.HTMLExporter().write_output(repo)
 
 
 
