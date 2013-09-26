@@ -54,16 +54,18 @@ def msort(a,b):
 class HTMLData(BackendData):
 	def __init__(self,path):
 		BackendData.__init__(self,"html",path)
-		self.templates = {}
-		template_root = join(self.backend_root,"template")
-		for filename in listdir(template_root):
-			name = splitext(basename(filename))[0]
-			template_path = join(template_root,filename)
-			self.templates[name] = string.Template(open(template_path).read())
+		self.template_root = join(self.backend_root,"template")
 
 class HTMLExporter(BackendExporter):
 	def write_output(self,repo):
 		html = repo.html
+
+		#load templates
+		self.templates = {}
+		for filename in listdir(template_root):
+			name = splitext(basename(filename))[0]
+			template_path = join(template_root,filename)
+			self.templates[name] = string.Template(open(template_path).read())
 
 		#clear output and copy files
 		self.clear_output_dir(html)
@@ -98,7 +100,7 @@ class HTMLExporter(BackendExporter):
 		params["bodies"] = html_table(data,header)
 
 		fid = open(join(html.out_root,"index.html"),'w')
-		fid.write(html.templates["index"].substitute(params))
+		fid.write(self.templates["index"].substitute(params))
 		fid.close()
 
 
@@ -121,7 +123,7 @@ class HTMLExporter(BackendExporter):
 		params["classes"] = html_table(data,header,row_classes)
 
 		fid = open(join(html.out_root,"collections","%s.html" % coll.id),'w')
-		fid.write(html.templates["collection"].substitute(params))
+		fid.write(self.templates["collection"].substitute(params))
 		fid.close()
 
 	def _write_body(self,repo,body):
@@ -138,7 +140,7 @@ class HTMLExporter(BackendExporter):
 		params["classes"] = html_table(data,header,row_classes)
 
 		fid = open(join(html.out_root,"bodies","%s.html" % body),'w')
-		fid.write(repo.html.templates["body"].substitute(params))
+		fid.write(self.templates["body"].substitute(params))
 		fid.close()
 
 
@@ -235,7 +237,7 @@ class HTMLExporter(BackendExporter):
 
 
 		fid = open(join(html.out_root,"classes","%s.html" % cl.name),'w')
-		fid.write(html.templates["class"].substitute(params))
+		fid.write(self.templates["class"].substitute(params))
 		fid.close()
 
 #class TasksExporter:
