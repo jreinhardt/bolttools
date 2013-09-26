@@ -21,35 +21,8 @@ from os.path import join, exists, basename,splitext
 from shutil import rmtree,copytree
 import string
 
-#inspired by html.py but avoiding the dependency
-
-def html_table(table_data,header=None,row_classes=None):
-	"generates the content of a html table without the surrounding table tags"
-	res = []
-	if not header is None:
-		row = " ".join(["<th>%s</th>" % str(head) for head in header])
-		res.append("<tr>%s<tr>" % row)
-	if row_classes is None:
-		row_classes = [None]*len(table_data)
-	for row_data,row_class in zip(table_data,row_classes):
-		row = " ".join(["<td>%s</td>" % str(datum) for datum in row_data])
-		if row_class is None:
-			res.append("<tr>%s</tr>" % row)
-		else:
-			res.append("<tr class='%s'>%s</tr>" % (row_class,row))
-	return "\n".join(res)
-
 def prop_row(props,prop,value):
 	props.append("<tr><th><strong>%s:</strong></th><td>%s</td></tr>" %(prop,value))
-
-def msort(a,b):
-	val_a, val_b = float(a[1:]),float(b[1:])
-	if val_a < val_b:
-		return -1
-	elif val_a > val_b:
-		return 1
-	else:
-		return 0
 
 class HTMLData(BackendData):
 	def __init__(self,path):
@@ -76,7 +49,6 @@ class HTMLExporter(BackendExporter):
 
 		#copy drawings
 		copytree(join(repo.path,"drawings"),join(html.out_root,"drawings"))
-
 
 		#write collections and parts
 		for coll in repo.collections:

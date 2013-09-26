@@ -22,6 +22,24 @@ import re
 
 _re_angled = re.compile("([^<]*)<([^>]*)")
 
+#inspired by html.py but avoiding the dependency
+def html_table(table_data,header=None,row_classes=None):
+	"generates the content of a html table without the surrounding table tags"
+	res = []
+	if not header is None:
+		row = " ".join(["<th>%s</th>" % str(head) for head in header])
+		res.append("<tr>%s<tr>" % row)
+	if row_classes is None:
+		row_classes = [None]*len(table_data)
+	for row_data,row_class in zip(table_data,row_classes):
+		row = " ".join(["<td>%s</td>" % str(datum) for datum in row_data])
+		if row_class is None:
+			res.append("<tr>%s</tr>" % row)
+		else:
+			res.append("<tr class='%s'>%s</tr>" % (row_class,row))
+	return "\n".join(res)
+
+
 class BackendData:
 	def __init__(self,name,path):
 		self.repo_root = path
