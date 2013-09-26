@@ -96,7 +96,7 @@ class HTMLExporter(BackendExporter):
 
 		params = {}
 		params["ncontributors"] = str(len(contributors_names))
-		params["table"] = html_table([contributors_names])
+		params["table"] = html_table([[name] for name in contributors_names])
 
 		fid = open(join(html.out_root,"contributors.html"),'w')
 		fid.write(self.templates["contributors"].substitute(params))
