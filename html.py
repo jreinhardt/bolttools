@@ -76,6 +76,33 @@ class HTMLExporter(BackendExporter):
 		fid.close()
 
 
+		#write contributors list
+		#collect contributors
+		contributors_names = []
+		for coll in repo.collections:
+			for name in coll.author_names:
+				if not name in contributors_names:
+					contributors_names.append(name)
+		if not repo.freecad is None:
+			for id, base in repo.freecad.getbase.iteritems():
+				for name in base.author_names:
+					if not name in contributors_names:
+						contributors_names.append(name)
+		if not repo.openscad is None:
+			for id, base in repo.openscad.getbase.iteritems():
+				for name in base.author_names:
+					if not name in contributors_names:
+						contributors_names.append(name)
+
+		params = {}
+		params["ncontributors"] = str(len(contributors_names))
+		params["table"] = html_table([contributors_names])
+
+		fid = open(join(html.out_root,"contributors.html"),'w')
+		fid.write(self.templates["contributors"].substitute(params))
+		fid.close()
+
+
 	def _write_collection(self,repo,coll):
 		html = repo.html
 		params = {}
