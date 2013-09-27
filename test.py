@@ -117,6 +117,10 @@ class TestOpenSCADGeneration(unittest.TestCase):
 		self.assertEqual(len(repo.openscad.getbase),1)
 		openscad.OpenSCADExporter().write_output(repo)
 
+	def test_base_params(self):
+		repo = blt_parser.BOLTSRepository("test_repos/base_params")
+		openscad.OpenSCADExporter().write_output(repo)
+
 class TestFreeCADGeneration(unittest.TestCase):
 	def test_data_init(self):
 		scad = freecad.FreeCADData("test_repos/small")
@@ -124,6 +128,10 @@ class TestFreeCADGeneration(unittest.TestCase):
 	def test_fcstd(self):
 		repo = blt_parser.BOLTSRepository("test_repos/fcstd")
 		self.assertEqual(len(repo.freecad.getbase),2)
+		freecad.FreeCADExporter().write_output(repo)
+
+	def test_base_params(self):
+		repo = blt_parser.BOLTSRepository("test_repos/base_params")
 		freecad.FreeCADExporter().write_output(repo)
 
 class TestHTMLGeneration(unittest.TestCase):
