@@ -19,24 +19,23 @@ from os.path import join, exists, basename
 from shutil import rmtree,copy
 
 from errors import *
-from common import BackendData, BackendExporter, BaseBase
+from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
 
 _specification = {
 	"file-module" : (["filename","author","license","type","modules"],[]),
 	"file-stl" : (["filename","author","license","type","classids"],[]),
-	"module" : (["name", "arguments","classids"],[]),
+	"module" : (["name", "arguments","classids"],["parameters"]),
 }
 
 
-def get_incantation(cl):
+def get_incantation(cl,params):
 	arg_strings = []
-	params = cl.parameters
 	for p in params.free:
 		if params.types[p] in ["String","Table Index"]:
 			arg_strings.append('%s="%s"' % (p,params.defaults[p]))
 		else:
 			arg_strings.append('%s=%s' % (p,params.defaults[p]))
-	return '%s(%s)' % (cl.name, ', '.join(arg_strings))
+	return '%s(%s)' % (cl.name.replace("-","_"), ', '.join(arg_strings))
 
 class OpenSCADBase(BaseBase):
 	def __init__(self,basefile,collname):
@@ -60,6 +59,12 @@ class BaseModule(OpenSCADBase):
 		self.name = mod["name"]
 		self.arguments = mod["arguments"]
 		self.classids = mod["classids"]
+
+		if "parameters" in mod:
+			self.parameters = BOLTSParameters(mod["parameters"])
+		else:
+			self.parameters = BOLTSParameters({})
+
 	def _check_conformity(self,mod,basefile):
 		spec = _specification
 		check_dict(mod,spec["module"])
@@ -77,6 +82,11 @@ class BaseSTL(OpenSCADBase):
 		self._check_conformity(basefile)
 		OpenSCADBase.__init__(self,basefile,collname)
 		self.classids = basefile["classids"]
+
+		if "parameters" in basefile:
+			self.parameters = BOLTSParameters(basefile["parameters"])
+		else:
+			self.parameters = BOLTSParameters({})
 	def _check_conformity(self,basefile):
 		spec = _specification
 		check_dict(basefile,spec["file-stl"])
@@ -111,7 +121,7 @@ class OpenSCADData(BackendData):
 							module = BaseModule(mod,basefile,coll)
 							for id in module.classids:
 								if id in self.getbase:
-									raise NonUniqueClassIdentifier
+									raise MalformedRepositoryError("Non-unique base for classid: %s" % id)
 								self.getbase[id] = module
 						except ParsingError as e:
 							e.set_base(basefile["filename"])
@@ -177,7 +187,7 @@ class OpenSCADExporter(BackendExporter):
 			for cl in collection.classes:
 				if not cl.id in repo.openscad.getbase:
 					continue
-				table_path = join("tables","%s_table.scad" % cl.name)
+				table_path = join("tables","%s_table.scad" % cl.name.replace("-","_"))
 				table_filename = join(out_path,table_path)
 				fid = open(table_filename,"w")
 				self.write_table(fid,collection,cl)
@@ -211,7 +221,7 @@ class OpenSCADExporter(BackendExporter):
 
 			data = table.data
 
-			fid.write("function %s_table_%d(key) = \n" % (cl.name,i))
+			fid.write("function %s_table_%d(key) = \n" % (cl.name.replace("-","_"),i))
 			for k,values in data.iteritems():
 				data = ["None" if v is None else v for v in values]
 				fid.write('key == "%s" ? %s : \n' % (k,str(data).replace("'",'"')))
@@ -222,7 +232,8 @@ class OpenSCADExporter(BackendExporter):
 		args = {}
 		if not cl.standard is None:
 			args['standard'] = '"%s"' % cl.name
-		params = cl.parameters
+		#class parameters
+		params = cl.parameters.union(repo.openscad.getbase[cl.id].parameters)
 		for p in params.free:
 			args[p] = p
 		args.update(params.literal)
@@ -231,7 +242,7 @@ class OpenSCADExporter(BackendExporter):
 				args[p] = 'measures_%d[%d]' % (i,j)
 
 		#incantation
-		fid.write("module %s{\n" % get_incantation(cl))
+		fid.write("module %s{\n" % get_incantation(cl,params))
 
 		#warnings and type checks
 		if cl.status == "withdrawn":
@@ -244,7 +255,7 @@ class OpenSCADExporter(BackendExporter):
 
 		#load table data
 		for table,i in zip(cl.parameters.tables,range(len(cl.parameters.tables))):
-			fid.write('\tmeasures_%d = %s_table_%d(%s);\n' % (i,cl.name,i,table.index))
+			fid.write('\tmeasures_%d = %s_table_%d(%s);\n' % (i,cl.name.replace("-","_"),i,table.index))
 			fid.write('\tif(measures_%d == "Error"){\n' % i)
 			fid.write('\t\techo("TableLookUpError in %s, table %d");\n\t}\n' % (cl.name,i))
 

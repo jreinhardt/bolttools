@@ -130,6 +130,23 @@ class BOLTSParameters:
 				raise KeyError("Parameter value not collected: %s" % p)
 		return res
 
+	def union(self,other):
+		res = BOLTSParameters({})
+		res.literal.update(self.literal)
+		res.literal.update(other.literal)
+		res.free = self.free + other.free
+		res.tables = self.tables + other.tables
+		res.parameters = list(set(self.parameters))
+		for k,v in self.types.iteritems():
+			res.types[k] = v
+		for k,v in other.types.iteritems():
+			res.types[k] = v
+		for k,v in self.defaults.iteritems():
+			res.defaults[k] = v
+		for k,v in other.defaults.iteritems():
+			res.defaults[k] = v
+		return res
+
 class BOLTSTable:
 	def __init__(self,table):
 		self._check_conformity(table)

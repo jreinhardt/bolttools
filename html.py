@@ -230,7 +230,7 @@ class HTMLExporter(BackendExporter):
 
 				params["openscadincantation"] = "<h2>Incantation</h2>\n"
 				params["openscadincantation"] += "{% highlight python %}\n"
-				params["openscadincantation"] += "%s;\n" % openscad.get_incantation(cl)
+				params["openscadincantation"] += "%s;\n" % openscad.get_incantation(cl,cl.parameters.union(base.parameters))
 				params["openscadincantation"] += "{% endhighlight %}\n"
 			else:
 				params["openscad"] = "<tr><td>Class is not available in OpenSCAD</td></tr>\n"
