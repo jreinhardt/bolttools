@@ -308,7 +308,7 @@ Parameter Collection
 
 Parameter Collection is the process of assigning a value to each parameter. The
 set of all parameters is found by collecting parameter names from the fields of
-a parameter-element_:
+one or more parameter-element_:
 
 - The keys of the literal field.
 - The items of the free field.
@@ -435,6 +435,10 @@ the following keys:
   parameters of the class, see parameter-collection_.
 - classids: mandatory, list of string. A list of class ids for which this base
   module should be used.
+- parameters: optional, parameter-element_: Additional basespecific parameters.
+  These parameters allow to represent additional paramters, which are not
+  specific to the class, but to the base. This allows e.g. to let the user
+  choose  between a detailed and a schematic representation of the part.
 
 .. _base-file-type-stl:
 
@@ -480,6 +484,10 @@ with the following keys:
 - name: mandatory, string. The name of the function.
 - classids: mandatory, list of string. A list of class ids for which this base
   module should be used.
+- parameters: optional, parameter-element_: Additional basespecific parameters.
+  These parameters allow to represent additional paramters, which are not
+  specific to the class, but to the base. This allows e.g. to let the user
+  choose  between a detailed and a schematic representation of the part.
 
 .. _base-file-type-fcstd:
 
@@ -495,7 +503,7 @@ associative array with the following keys:
   e-mail adress in <> or a list of several authors.
 - license: mandatory, string. The license of the file
 - type: "fcstd"
-- object: mandatory, list of base-object-element_.
+- objects: mandatory, list of base-object-element_.
 
 .. _base-object-element:
 
@@ -508,5 +516,9 @@ Document. It has the following keys:
 - objectname: mandatory, string. The name of the part in the document.
 - classids: mandatory, list of string. A list of class ids for which this base
   part should be used.
+- parameters: optional, parameter-element_: Additional basespecific parameters.
+  These parameters allow to represent additional paramters, which are not
+  specific to the class, but to the base. This allows e.g. to let the user
+  choose  between a detailed and a schematic representation of the part.
 - paramtoprop: optional, associative array. This maps parameters to properties
   of the object. Defaults to {"name" : "Label"}
