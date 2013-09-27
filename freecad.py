@@ -24,8 +24,8 @@ import importlib
 _freecad_base_specification = {
 	"file-function" : (["filename","author","license","type","functions"],[]),
 	"file-fcstd" : (["filename","author","license","type","objects"],[]),
-	"function" : (["name","classids"],["baseid"]),
-	"object" : (["objectname","classids"],["baseid","paramtoprop"])
+	"function" : (["name","classids"],[]),
+	"object" : (["objectname","classids"],["paramtoprop"])
 }
 
 class FreeCADBase(BaseBase):
@@ -41,9 +41,6 @@ class BaseFunction(FreeCADBase):
 		self._check_conformity(function,basefile)
 		FreeCADBase.__init__(self,basefile,collname,backend_root)
 		self.name = function["name"]
-		self.baseid = self.name
-		if "baseid" in function:
-			self.baseid = function["baseid"]
 		self.classids = function["classids"]
 		self.module_name = splitext(basename(self.filename))[0]
 	def _check_conformity(self,function, basefile):
@@ -59,9 +56,6 @@ class BaseFcstd(FreeCADBase):
 		self._check_conformity(obj,basefile)
 		FreeCADBase.__init__(self,basefile,collname,backend_root)
 		self.objectname = obj["objectname"]
-		self.baseid = self.objectname
-		if "baseid" in obj:
-			self.baseid = obj["baseid"]
 		self.paramtoprop = {"name" : "Label"}
 		if "paramtoprop" in obj:
 			self.paramtoprop = obj["paramtoprop"]

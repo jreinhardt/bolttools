@@ -429,7 +429,6 @@ Base module element
 A base module element is a associative array describing an OpenSCAD module with
 the following keys:
 
-- baseid: optional, string. An id for this base. If not given, defaults to name.
 - name: mandatory, string. The name of the module.
 - arguments: mandatory, list of strings. A list with the arguments that need to
   be supplied to the module, in the correct order.  Is a subset of the
@@ -451,7 +450,6 @@ the STL format. It is an associative array with the following keys:
   e-mail adress in <> or a list of several authors.
 - license: mandatory, string. The license of the file
 - type: "stl"
-- baseid: optional, string. an id for this base. If not given, defaults to the filename.
 - classids: mandatory, list of string. A list of class ids for which this base
   module should be used.
 
@@ -479,7 +477,6 @@ Base function element
 A base function element is a associative array describing a python function
 with the following keys:
 
-- baseid: optional, string. An id for this base. If not given, defaults to name.
 - name: mandatory, string. The name of the function.
 - classids: mandatory, list of string. A list of class ids for which this base
   module should be used.
@@ -508,7 +505,6 @@ Base object element
 A base object element is an associative array describing an object in a FreeCAD
 Document. It has the following keys:
 
-- baseid: optional, string. An id for this base. if not given, defaults to objectname.
 - objectname: mandatory, string. The name of the part in the document.
 - classids: mandatory, list of string. A list of class ids for which this base
   part should be used.

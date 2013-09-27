@@ -22,8 +22,8 @@ import yaml
 
 _openscad_base_specification = {
 	"file-module" : (["filename","author","license","type","modules"],[]),
-	"file-stl" : (["filename","author","license","type","classids"],["baseid"]),
-	"module" : (["name", "arguments","classids"],["baseid"]),
+	"file-stl" : (["filename","author","license","type","classids"],[]),
+	"module" : (["name", "arguments","classids"],[]),
 }
 
 
@@ -56,9 +56,6 @@ class BaseModule(OpenSCADBase):
 	def __init__(self,mod,basefile,collname):
 		self._check_conformity(mod,basefile)
 		OpenSCADBase.__init__(self,basefile,collname)
-		self.baseid = mod["name"]
-		if "baseid" in mod:
-			self.baseid = mod["baseid"]
 		self.name = mod["name"]
 		self.arguments = mod["arguments"]
 		self.classids = mod["classids"]
@@ -78,9 +75,6 @@ class BaseSTL(OpenSCADBase):
 	def __init__(self,basefile,collname):
 		self._check_conformity(basefile)
 		OpenSCADBase.__init__(self,basefile,collname)
-		self.baseid = self.filename
-		if "baseid" in basefile:
-			self.baseid = basefile["baseid"]
 		self.classids = basefile["classids"]
 	def _check_conformity(self,basefile):
 		spec = _openscad_base_specification
