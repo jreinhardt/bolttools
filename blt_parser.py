@@ -15,24 +15,22 @@
 
 import yaml
 import os
-from os.path import splitext, split, exists, join
 import re
-import copy
+from os.path import splitext, split, exists, join
+
 import openscad,freecad, html, downloads
 from errors import *
+from common import BOLTSParameters, BOLTSNaming
 
 _re_angled = re.compile("([^<]*)<([^>]*)")
 
 current_version = 0.2
 
 #this is not super-precise, but allows to do some rough checks
-_blt_specification = {
+_specification = {
 	"root" : (["collection","classes"],[]),
 	"collection" : (["author","license","blt-version"],["name","description"]),
 	"class" : (["naming","source","id"],["drawing","description","standard","status","replaces","parameters","url","notes"]),
-	"naming" : (["template"],["substitute"]),
-	"parameters" : ([],["literal","free","tables","types","defaults"]),
-	"table" : (["index","columns","data"],[])
 }
 
 class BOLTSRepository:
@@ -175,7 +173,7 @@ class BOLTSCollection:
 		return id
 
 	def _check_conformity(self,coll):
-		spec = _blt_specification
+		spec = _specification
 		check_dict(coll,spec["root"])
 		check_dict(coll["collection"],spec["collection"])
 		classes = coll["classes"]
@@ -242,135 +240,6 @@ class BOLTSClass:
 		self.name = name
 
 	def _check_conformity(self,cl):
-		spec = _blt_specification
+		spec = _specification
 		check_dict(cl,spec["class"])
 
-
-class BOLTSParameters:
-	type_defaults = {
-		"Length (mm)" : 10,
-		"Length (in)" : 1,
-		"Number" : 1,
-		"Bool" : False,
-		"Table Index": '',
-		"String" : ''
-	}
-	def __init__(self,param):
-		self._check_conformity(param)
-		self.literal = {}
-		if "literal" in param:
-			self.literal = param["literal"]
-
-		self.free = []
-		if "free" in param:
-			self.free = param["free"]
-
-		self.tables = []
-		if "tables" in param:
-			if isinstance(param["tables"],list):
-				for t in param["tables"]:
-					self.tables.append(BOLTSTable(t))
-			else:
-				self.tables.append(BOLTSTable(param["tables"]))
-
-		self.types = {}
-		if "types" in param:
-			self.types = param["types"]
-
-		self.parameters = []
-		self.parameters += self.literal.keys()
-		self.parameters += self.free
-		for t in self.tables:
-			self.parameters.append(t.index)
-			self.parameters += t.columns
-		#remove duplicates
-		self.parameters = list(set(self.parameters))
-
-		#check types
-		all_types = ["Length (mm)", "Length (in)", "Number",
-			"Bool", "Table Index", "String"]
-		
-		for k,t in self.types.iteritems():
-			if not k in self.parameters:
-				raise ValueError("Unknown parameter in types: %s" % k)
-			if not t in all_types:
-				raise ValueError("Unknown type in types: %s" % t)
-
-		#fill in defaults for types
-		for p in self.parameters:
-			if not p in self.types:
-				self.types[p] = "Length (mm)"
-
-		#check and normalize tables
-		for t in self.tables:
-			t._normalize_and_check_types(self.types)
-
-		#default values for free parameters
-		self.defaults = {p:self.type_defaults[self.types[p]] for p in self.free}
-		if "defaults" in param:
-			for p in param["defaults"]:
-				if p not in self.free:
-					raise ValueError("Default value given for non-free parameter");
-				self.defaults[p] = param["defaults"][p]
-
-	def _check_conformity(self,param):
-		spec = _blt_specification
-		check_dict(param,spec["parameters"])
-
-	def collect(self,free):
-		res = {}
-		res.update(self.literal)
-		res.update(free)
-		for table in self.tables:
-			res.update(dict(zip(table.columns,table.data[res[table.index]])))
-		for p in self.parameters:
-			if not p in res:
-				raise KeyError("Parameter value not collected: %s" % p)
-		return res
-
-class BOLTSTable:
-	def __init__(self,table):
-		self._check_conformity(table)
-		self.index = table["index"]
-		self.columns = table["columns"]
-		self.data = copy.deepcopy(table["data"])
-
-	def _check_conformity(self,table):
-		spec = _blt_specification
-		check_dict(table,spec["table"])
-
-	def _normalize_and_check_types(self,types):
-		numbers = ["Length (mm)", "Length (in)", "Number"]
-		positive = ["Length (mm)", "Length (in)"]
-		rest = ["Bool", "Table Index", "String"]
-		col_types = [types[col] for col in self.columns]
-		idx = range(len(self.columns))
-		for key in self.data:
-			row = self.data[key]
-			for i,t in zip(idx,col_types):
-				if row[i] == "None":
-					row[i] = None
-				else:
-					if t in numbers:
-						row[i] = float(row[i])
-					elif not t in rest:
-						raise ValueError("Unknown Type in table: %s" % t)
-					if t in positive and row[i] < 0:
-						raise ValueError("Negative length in table: %f" % row[i])
-					if t == "Bool":
-						row[i] = bool(row[i])
-
-class BOLTSNaming:
-	def __init__(self,name):
-		self._check_conformity(name)
-		self.template = name["template"]
-		self.substitute = []
-		if "substitute" in name:
-			self.substitute = name["substitute"]
-
-	def _check_conformity(self,name):
-		spec = _blt_specification
-		check_dict(name,spec["naming"])
-
-	def get_name(self,params):
-		return self.template % (params[s] for s in self.substitute)

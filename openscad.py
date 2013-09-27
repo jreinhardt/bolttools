@@ -13,14 +13,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from errors import *
-from common import BackendData, BackendExporter, BaseBase
+import yaml
 from os import listdir,makedirs
 from os.path import join, exists, basename
 from shutil import rmtree,copy
-import yaml
 
-_openscad_base_specification = {
+from errors import *
+from common import BackendData, BackendExporter, BaseBase
+
+_specification = {
 	"file-module" : (["filename","author","license","type","modules"],[]),
 	"file-stl" : (["filename","author","license","type","classids"],[]),
 	"module" : (["name", "arguments","classids"],[]),
@@ -60,7 +61,7 @@ class BaseModule(OpenSCADBase):
 		self.arguments = mod["arguments"]
 		self.classids = mod["classids"]
 	def _check_conformity(self,mod,basefile):
-		spec = _openscad_base_specification
+		spec = _specification
 		check_dict(mod,spec["module"])
 		check_dict(basefile,spec["file-module"])
 	def get_copy_files(self):
@@ -77,7 +78,7 @@ class BaseSTL(OpenSCADBase):
 		OpenSCADBase.__init__(self,basefile,collname)
 		self.classids = basefile["classids"]
 	def _check_conformity(self,basefile):
-		spec = _openscad_base_specification
+		spec = _specification
 		check_dict(basefile,spec["file-stl"])
 	def get_copy_files(self):
 		return [self.path]

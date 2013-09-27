@@ -13,19 +13,20 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from common import BackendData, BackendExporter, BaseBase
+import yaml
+import importlib
 from os import listdir,makedirs
 from os.path import join, exists, basename,splitext
 from shutil import rmtree,copy,copytree
-from errors import *
-import yaml
-import importlib
 
-_freecad_base_specification = {
+from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
+from errors import *
+
+_specification = {
 	"file-function" : (["filename","author","license","type","functions"],[]),
 	"file-fcstd" : (["filename","author","license","type","objects"],[]),
-	"function" : (["name","classids"],[]),
-	"object" : (["objectname","classids"],["paramtoprop"])
+	"function" : (["name","classids"],["parameters"]),
+	"object" : (["objectname","classids"],["paramtoprop","parameters"]),
 }
 
 class FreeCADBase(BaseBase):
@@ -43,8 +44,12 @@ class BaseFunction(FreeCADBase):
 		self.name = function["name"]
 		self.classids = function["classids"]
 		self.module_name = splitext(basename(self.filename))[0]
+		if "parameters" in function:
+			self.parameters = BOLTSParameters(function["parameters"])
+		else:
+			self.parameters = BOLTSParameters({})
 	def _check_conformity(self,function, basefile):
-		spec = _freecad_base_specification
+		spec = _specification
 		check_dict(function,spec["function"])
 		check_dict(basefile,spec["file-function"])
 	def add_part(self,params,doc):
@@ -59,9 +64,13 @@ class BaseFcstd(FreeCADBase):
 		self.paramtoprop = {"name" : "Label"}
 		if "paramtoprop" in obj:
 			self.paramtoprop = obj["paramtoprop"]
+		if "parameters" in obj:
+			self.parameters = BOLTSParameters(obj["parameters"])
+		else:
+			self.parameters = BOLTSParameters({})
 	
 	def _check_conformity(self,obj,basefile):
-		spec = _freecad_base_specification
+		spec = _specification
 		check_dict(basefile,spec["file-fcstd"])
 		check_dict(obj,spec["object"])
 
