@@ -116,7 +116,7 @@ class HTMLExporter(BackendExporter):
 						in_freecad = "Yes"
 						base = repo.freecad.getbase[cl.id]
 						if isinstance(base,freecad.BaseFcstd):
-							in_frecad = "Yes (Fcstd)"
+							in_freecad = "Yes (Fcstd)"
 						elif isinstance(base,freecad.BaseFunction):
 							in_freecad = "Yes (function)"
 				in_openscad = "Deactivated"
@@ -125,7 +125,7 @@ class HTMLExporter(BackendExporter):
 						in_openscad = "Yes"
 						base = repo.openscad.getbase[cl.id]
 						if isinstance(base,openscad.BaseModule):
-							in_frecad = "Yes (module)"
+							in_openscad = "Yes (module)"
 						elif isinstance(base,openscad.BaseSTL):
 							in_openscad = "Yes (stl)"
 				rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
