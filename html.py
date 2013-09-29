@@ -104,6 +104,36 @@ class HTMLExporter(BackendExporter):
 		fid.write(self.templates["contributors"].substitute(params))
 		fid.close()
 
+		#write base overview
+		rows = []
+		for coll in repo.collections:
+			for cl in coll.classes:
+				in_freecad = "Deactivated"
+				if not repo.freecad is None:
+					if cl.id in repo.freecad.getbase:
+						in_freecad = "Yes"
+						base = repo.freecad.getbase[cl.id]
+						if isinstance(freecad.BaseFcstd):
+							in_frecad = "Yes (Fcstd)"
+						elif isinstance(freecad.BaseFunction):
+							in_freecad = "Yes (function)"
+				in_openscad = "Deactivated"
+				if not repo.openscad is None:
+					if cl.id in repo.openscad.getbase:
+						in_openscad = "Yes"
+						base = repo.openscad.getbase[cl.id]
+						if isinstance(openscad.BaseModule):
+							in_frecad = "Yes (module)"
+						elif isinstance(openscad.BaseSTL):
+							in_openscad = "Yes (stl)"
+				rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
+
+		params["basetable"] = html_table(rows,["Class id","Standards","FreeCAD","OpenSCAD"])
+
+		fid = open(join(html.out_root,"tasks.html"),'w')
+		fid.write(self.templates["tasks"].substitute(params))
+		fid.close()
+
 
 	def _write_collection(self,repo,coll):
 		html = repo.html
