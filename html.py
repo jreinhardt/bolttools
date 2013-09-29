@@ -108,6 +108,7 @@ class HTMLExporter(BackendExporter):
 
 		#write base overview
 		rows = []
+		status = []
 		for coll in repo.collections:
 			for cl in coll.classes:
 				in_freecad = "Deactivated"
@@ -128,9 +129,15 @@ class HTMLExporter(BackendExporter):
 							in_openscad = "Yes (module)"
 						elif isinstance(base,openscad.BaseSTL):
 							in_openscad = "Yes (stl)"
+				if (cl.id in repo.freecad.getbase) and (cl.id in repo.openscad.getbase):
+					status.append("complete")
+				elif (not cl.id in repo.freecad.getbase) or (not cl.id in repo.openscad.getbase):
+					status.append("partial")
+				else:
+					status.append("none")
 				rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 
-		params["basetable"] = html_table(rows,["Class id","Standards","FreeCAD","OpenSCAD"])
+		params["basetable"] = html_table(rows,["Class id","Standards","FreeCAD","OpenSCAD"],status)
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
