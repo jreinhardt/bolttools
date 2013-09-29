@@ -17,6 +17,7 @@ import yaml
 from os import listdir,makedirs
 from os.path import join, exists, basename
 from shutil import rmtree,copy
+from codecs import open
 
 from errors import *
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
@@ -109,7 +110,7 @@ class OpenSCADData(BackendData):
 			if not exists(basename):
 				#skip directory that is no collection
 				continue
-			base =  list(yaml.load_all(open(basename)))
+			base =  list(yaml.load_all(open(basename,"r","utf8")))
 			if len(base) != 1:
 				raise MalformedCollectionError(
 						"No YAML document found in file %s" % bltname)
@@ -146,10 +147,10 @@ class OpenSCADExporter(BackendExporter):
 
 		self.clear_output_dir(oscad)
 		#copy files
-		bolts_fid = open(join(out_path,"BOLTS.scad"),"w")
+		bolts_fid = open(join(out_path,"BOLTS.scad"),"w","utf8")
 		standard_fids = {}
 		for std in repo.standard_bodies:
-			standard_fids[std] = open(join(out_path,"BOLTS_%s.scad" % std),"w")
+			standard_fids[std] = open(join(out_path,"BOLTS_%s.scad" % std),"w","utf8")
 
 		makedirs(join(out_path,"tables"))
 
@@ -189,7 +190,7 @@ class OpenSCADExporter(BackendExporter):
 					continue
 				table_path = join("tables","%s_table.scad" % cl.name.replace("-","_"))
 				table_filename = join(out_path,table_path)
-				fid = open(table_filename,"w")
+				fid = open(table_filename,"w","utf8")
 				self.write_table(fid,collection,cl)
 				fid.close()
 

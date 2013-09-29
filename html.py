@@ -13,13 +13,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from common import BackendData, BackendExporter, html_table
-import freecad,openscad
-from os import listdir,makedirs
 import re
+import string
+from os import listdir,makedirs
 from os.path import join, exists, basename,splitext
 from shutil import rmtree,copytree
-import string
+from codecs import open
+
+import freecad,openscad
+from common import BackendData, BackendExporter, html_table
 
 def prop_row(props,prop,value):
 	props.append("<tr><th><strong>%s:</strong></th><td>%s</td></tr>" %(prop,value))
@@ -73,7 +75,7 @@ class HTMLExporter(BackendExporter):
 		header = ["Name", "Description"]
 		params["bodies"] = html_table(data,header)
 
-		fid = open(join(html.out_root,"index.html"),'w')
+		fid = open(join(html.out_root,"index.html"),'w','utf8')
 		fid.write(self.templates["index"].substitute(params))
 		fid.close()
 
@@ -100,7 +102,7 @@ class HTMLExporter(BackendExporter):
 		params["ncontributors"] = str(len(contributors_names))
 		params["table"] = html_table([[name] for name in contributors_names])
 
-		fid = open(join(html.out_root,"contributors.html"),'w')
+		fid = open(join(html.out_root,"contributors.html"),'w','utf8')
 		fid.write(self.templates["contributors"].substitute(params))
 		fid.close()
 
@@ -113,24 +115,24 @@ class HTMLExporter(BackendExporter):
 					if cl.id in repo.freecad.getbase:
 						in_freecad = "Yes"
 						base = repo.freecad.getbase[cl.id]
-						if isinstance(freecad.BaseFcstd):
+						if isinstance(base,freecad.BaseFcstd):
 							in_frecad = "Yes (Fcstd)"
-						elif isinstance(freecad.BaseFunction):
+						elif isinstance(base,freecad.BaseFunction):
 							in_freecad = "Yes (function)"
 				in_openscad = "Deactivated"
 				if not repo.openscad is None:
 					if cl.id in repo.openscad.getbase:
 						in_openscad = "Yes"
 						base = repo.openscad.getbase[cl.id]
-						if isinstance(openscad.BaseModule):
+						if isinstance(base,openscad.BaseModule):
 							in_frecad = "Yes (module)"
-						elif isinstance(openscad.BaseSTL):
+						elif isinstance(base,openscad.BaseSTL):
 							in_openscad = "Yes (stl)"
 				rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 
 		params["basetable"] = html_table(rows,["Class id","Standards","FreeCAD","OpenSCAD"])
 
-		fid = open(join(html.out_root,"tasks.html"),'w')
+		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
 		fid.close()
 
@@ -153,7 +155,7 @@ class HTMLExporter(BackendExporter):
 		row_classes = [cl.status for cl in coll.classes]
 		params["classes"] = html_table(data,header,row_classes)
 
-		fid = open(join(html.out_root,"collections","%s.html" % coll.id),'w')
+		fid = open(join(html.out_root,"collections","%s.html" % coll.id),'w','utf8')
 		fid.write(self.templates["collection"].substitute(params))
 		fid.close()
 
@@ -170,7 +172,7 @@ class HTMLExporter(BackendExporter):
 		row_classes = [cl.status for cl in repo.standardized[body]]
 		params["classes"] = html_table(data,header,row_classes)
 
-		fid = open(join(html.out_root,"bodies","%s.html" % body),'w')
+		fid = open(join(html.out_root,"bodies","%s.html" % body),'w','utf8')
 		fid.write(self.templates["body"].substitute(params))
 		fid.close()
 
@@ -267,7 +269,7 @@ class HTMLExporter(BackendExporter):
 				params["openscadincantation"] = ""
 
 
-		fid = open(join(html.out_root,"classes","%s.html" % cl.name),'w')
+		fid = open(join(html.out_root,"classes","%s.html" % cl.name),'w','utf8')
 		fid.write(self.templates["class"].substitute(params))
 		fid.close()
 

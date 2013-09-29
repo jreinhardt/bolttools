@@ -13,13 +13,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from common import BackendData, BackendExporter
+import string
 from os import listdir,makedirs
 from os.path import join, exists, basename
 from shutil import rmtree,copy, make_archive
 from subprocess import Popen, PIPE, call
 from datetime import datetime
-import string
+from codecs import open
+
+from common import BackendData, BackendExporter
 
 class UncommitedChangesError(Exception):
 	def __str__(self):
@@ -78,7 +80,7 @@ class DownloadsExporter(BackendExporter):
 		#generate html page
 		template_name = join(downloads.backend_root,"template","downloads.html")
 		template = string.Template(open(template_name).read())
-		fid = open(join(out_path,"downloads.html"),"w")
+		fid = open(join(out_path,"downloads.html"),"w","utf8")
 		fid.write(template.substitute(downloads.current))
 		fid.close()
 

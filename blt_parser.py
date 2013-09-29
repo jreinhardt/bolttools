@@ -17,6 +17,7 @@ import yaml
 import os
 import re
 from os.path import splitext, split, exists, join
+from codecs import open
 
 import openscad,freecad, html, downloads
 from errors import *
@@ -156,7 +157,7 @@ class BOLTSCollection:
 					raise
 
 	def _load_blt(self,bltname):
-		coll = list(yaml.load_all(open(bltname)))
+		coll = list(yaml.load_all(open(bltname,"r","utf8")))
 		if len(coll) == 0:
 			raise MalformedCollectionError(
 					"No YAML document found in file %s" % bltname)
