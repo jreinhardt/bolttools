@@ -18,6 +18,7 @@ import importlib
 from os import listdir,makedirs
 from os.path import join, exists, basename,splitext
 from shutil import rmtree,copy,copytree
+from codecs import open
 
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
 from errors import *
@@ -111,7 +112,7 @@ class FreeCADData(BackendData):
 			if not exists(basename):
 				#skip directory that is no collection
 				continue
-			base_info =  list(yaml.load_all(open(basename)))
+			base_info =  list(yaml.load_all(open(basename,"r","utf8")))
 			if len(base_info) != 1:
 				raise MalformedCollectionError(
 						"Not exactly one YAML document found in file %s" % bltname)
