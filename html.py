@@ -109,8 +109,12 @@ class HTMLExporter(BackendExporter):
 		#write base overview
 		rows = []
 		status = []
+		classids = []
 		for coll in repo.collections:
 			for cl in coll.classes:
+				if cl.id in classids:
+					continue
+				classids.append(cl.id)
 				in_freecad = "Deactivated"
 				if not repo.freecad is None:
 					if cl.id in repo.freecad.getbase:
