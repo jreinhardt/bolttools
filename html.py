@@ -134,12 +134,14 @@ class HTMLExporter(BackendExporter):
 						elif isinstance(base,openscad.BaseSTL):
 							in_openscad = "Yes (stl)"
 				if (cl.id in repo.freecad.getbase) and (cl.id in repo.openscad.getbase):
-					status.append("complete")
+					continue
+#					status.append("complete")
 				elif (not cl.id in repo.freecad.getbase) or (not cl.id in repo.openscad.getbase):
 					status.append("partial")
+					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 				else:
 					status.append("none")
-				rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
+					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 
 		params["basetable"] = html_table(rows,["Class id","Standards","FreeCAD","OpenSCAD"],status)
 
