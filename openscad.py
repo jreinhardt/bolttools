@@ -139,6 +139,8 @@ class OpenSCADData(BackendData):
 						raise e
 
 class OpenSCADExporter(BackendExporter):
+	def __init__(self):
+		BackendExporter.__init__(self)
 	def write_output(self,repo):
 		if repo.openscad is None:
 			raise MalformedRepositoryError("Can not export, OpenSCAD Backend is not active")

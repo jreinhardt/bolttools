@@ -35,6 +35,7 @@ class HTMLData(BackendData):
 
 class HTMLExporter(BackendExporter):
 	def __init__(self):
+		BackendExporter.__init__(self)
 		self.templates = {}
 	def write_output(self,repo):
 		if repo.html is None:

@@ -180,7 +180,7 @@ class FreeCADData(BackendData):
 
 class FreeCADExporter(BackendExporter):
 	def __init__(self):
-		pass
+		BackendExporter.__init__(self)
 	def write_output(self,repo):
 		if repo.freecad is None:
 			raise MalformedRepositoryError(

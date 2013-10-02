@@ -30,6 +30,7 @@ def check_dict(array,spec):
 
 class ParsingError(Exception):
 	def __init__(self):
+		Exception.__init__(self)
 		self.trace_info = {}
 		self.msg = "Something went wrong with parsing"
 	def set_repo_path(self,path):
@@ -41,7 +42,8 @@ class ParsingError(Exception):
 	def set_base(self,base):
 		self.trace_info["Base"] = base
 	def __str__(self):
-		trace = " ".join("%s: %s" % (k,str(v)) for k,v in self.trace_info.iteritems())
+		trace = " ".join("%s: %s" % (k,str(v))
+			for k,v in self.trace_info.iteritems())
 		return "%s.  %s" % (self.msg, trace)
 
 class VersionError(ParsingError):
@@ -73,4 +75,8 @@ class MalformedBaseError(ParsingError):
 	def __init__(self,msg):
 		ParsingError.__init__(self)
 		self.msg = msg
+
+class UncommitedChangesError(Exception):
+	def __str__(self):
+		return "There are uncommited changes in the git repo"
 

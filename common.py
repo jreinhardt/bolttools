@@ -203,6 +203,8 @@ class BackendData:
 
 
 class BackendExporter:
+	def __init__(self):
+		pass
 	def clear_output_dir(self,backend_data):
 		if not exists(backend_data.out_root):
 			makedirs(backend_data.out_root)

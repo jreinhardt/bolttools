@@ -14,22 +14,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import string
-from os import listdir,makedirs
+from os import listdir
 from os.path import join, exists, basename
-from shutil import rmtree,copy, make_archive
-from subprocess import Popen, PIPE, call
+from shutil import make_archive
+from subprocess import call
 from datetime import datetime
+# pylint: disable=W0622
 from codecs import open
 
 from common import BackendData, BackendExporter
-
-class UncommitedChangesError(Exception):
-	def __str__(self):
-		return "There are uncommited changes in the git repo"
+from errors import *
 
 def uncommited_changes_present():
 	return call(["git","diff","--exit-code","--quiet"]) == 1
-
 
 class DownloadsData(BackendData):
 	def __init__(self,path):
@@ -52,7 +49,10 @@ class DownloadsData(BackendData):
 				self.current["openscaddevzip"] = filename
 
 class DownloadsExporter(BackendExporter):
+	def __init__(self):
+		BackendExporter.__init__(self)
 	def write_output(self,repo):
+		# pylint: disable=R0201
 		downloads = repo.downloads
 		out_path = downloads.out_root
 
@@ -68,14 +68,18 @@ class DownloadsExporter(BackendExporter):
 		root_dir = join(repo.path,"output","freecad")
 		if (not repo.freecad is None) and exists(root_dir):
 			base_name = join(out_path,"downloads","freecad",template % "FreeCAD")
-			downloads.current["freecaddevtar"] = basename(make_archive(base_name,"gztar",root_dir))
-			downloads.current["freecaddevzip"] = basename(make_archive(base_name,"zip",root_dir))
+			downloads.current["freecaddevtar"] = \
+				basename(make_archive(base_name,"gztar",root_dir))
+			downloads.current["freecaddevzip"] = \
+				basename(make_archive(base_name,"zip",root_dir))
 
 		root_dir = join(repo.path,"output","openscad")
 		if (not repo.openscad is None) and exists(root_dir):
 			base_name = join(out_path,"downloads","openscad",template % "OpenSCAD")
-			downloads.current["openscaddevtar"] = basename(make_archive(base_name,"gztar",root_dir))
-			downloads.current["openscaddevzip"] = basename(make_archive(base_name,"zip",root_dir))
+			downloads.current["openscaddevtar"] = \
+				basename(make_archive(base_name,"gztar",root_dir))
+			downloads.current["openscaddevzip"] = \
+				basename(make_archive(base_name,"zip",root_dir))
 
 		#generate html page
 		template_name = join(downloads.backend_root,"template","downloads.html")
@@ -84,7 +88,7 @@ class DownloadsExporter(BackendExporter):
 		fid.write(template.substitute(downloads.current))
 		fid.close()
 
-
+#TODO:
 #		I do not like the fact that I am shipping unprocessed and unstyled html
 #		here, but I do not see a nice workflow for processing and styling, so I
 #		don't
