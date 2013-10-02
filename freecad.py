@@ -15,15 +15,16 @@
 
 import yaml
 import importlib
-from os import listdir,makedirs
-from os.path import join, exists, basename,splitext
-from shutil import rmtree,copy,copytree
+from os import listdir
+from os.path import join, exists, basename, splitext
+from shutil import copy, copytree
+# pylint: disable=W0622
 from codecs import open
 
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
 from errors import *
 
-_specification = {
+SPEC = {
 	"file-function" : (["filename","author","license","type","functions"],[]),
 	"file-fcstd" : (["filename","author","license","type","objects"],[]),
 	"function" : (["name","classids"],["parameters"]),
@@ -50,11 +51,11 @@ class BaseFunction(FreeCADBase):
 		else:
 			self.parameters = BOLTSParameters({})
 	def _check_conformity(self,function, basefile):
-		spec = _specification
-		check_dict(function,spec["function"])
-		check_dict(basefile,spec["file-function"])
+		check_dict(function,SPEC["function"])
+		check_dict(basefile,SPEC["file-function"])
 	def add_part(self,params,doc):
-		module = importlib.import_module("BOLTS.freecad.%s.%s" % (self.collection,self.module_name))
+		module = importlib.import_module("BOLTS.freecad.%s.%s" %
+			(self.collection,self.module_name))
 		module.__dict__[self.name](params,doc)
 
 class BaseFcstd(FreeCADBase):
@@ -71,13 +72,12 @@ class BaseFcstd(FreeCADBase):
 			self.parameters = BOLTSParameters({})
 	
 	def _check_conformity(self,obj,basefile):
-		spec = _specification
-		check_dict(basefile,spec["file-fcstd"])
-		check_dict(obj,spec["object"])
+		check_dict(basefile,SPEC["file-fcstd"])
+		check_dict(obj,SPEC["object"])
 
 	def _recursive_copy(self,src_obj,dst_doc,srcdstmap):
-		import FreeCAD, FreeCADGui
-		import Part, Sketcher
+		# pylint: disable=F0401
+		import FreeCADGui, Part, Sketcher
 
 		if src_obj.Name in srcdstmap:
 			return srcdstmap[src_obj.Name]
@@ -87,13 +87,13 @@ class BaseFcstd(FreeCADBase):
 			prop = src_obj.getPropertyByName(prop_name)
 			if isinstance(prop,tuple) or isinstance(prop,list):
 				new_prop = []
-				for p in prop:
-					if isinstance(p,Part.Feature):
-						new_prop.append(self._recursive_copy(p,dst_doc,srcdstmap))
-					elif isinstance(p,Sketcher.Sketch):
-						new_prop.append(dst_doc.copyObject(p))
+				for p_item in prop:
+					if isinstance(p_item,Part.Feature):
+						new_prop.append(self._recursive_copy(p_item,dst_doc,srcdstmap))
+					elif isinstance(p_item,Sketcher.Sketch):
+						new_prop.append(dst_doc.copyObject(p_item))
 					else:
-						new_prop.append(p)
+						new_prop.append(p_item)
 				if isinstance(prop,tuple):
 					new_prop = tuple(new_prop)
 				setattr(obj_copy,prop_name,new_prop)
@@ -104,10 +104,12 @@ class BaseFcstd(FreeCADBase):
 			else:
 				setattr(obj_copy,prop_name,src_obj.getPropertyByName(prop_name))
 		obj_copy.touch()
-		FreeCADGui.getDocument(dst_doc.Name).getObject(obj_copy.Name).Visibility = False
+		gui_doc = FreeCADGui.getDocument(dst_doc.Name)
+		gui_doc.getObject(obj_copy.Name).Visibility = False
 		return obj_copy
 
 	def add_part(self,params,doc):
+		# pylint: disable=F0401
 		import FreeCAD, FreeCADGui
 		#copy part to doc
 		src_doc = FreeCAD.openDocument(self.filename)
@@ -137,14 +139,14 @@ class FreeCADData(BackendData):
 		self.getbase = {}
 
 		for coll in listdir(self.backend_root):
-			basename = join(self.backend_root,coll,"%s.base" % coll)
-			if not exists(basename):
+			basefilename = join(self.backend_root,coll,"%s.base" % coll)
+			if not exists(basefilename):
 				#skip directory that is no collection
 				continue
-			base_info =  list(yaml.load_all(open(basename,"r","utf8")))
+			base_info =  list(yaml.load_all(open(basefilename,"r","utf8")))
 			if len(base_info) != 1:
 				raise MalformedCollectionError(
-						"Not exactly one YAML document found in file %s" % bltname)
+						"Not exactly one YAML document found in file %s" % basefilename)
 			base_info = base_info[0]
 			for basefile in base_info:
 				if basefile["type"] == "function":
@@ -177,7 +179,8 @@ class FreeCADData(BackendData):
 class FreeCADExporter(BackendExporter):
 	def write_output(self,repo):
 		if repo.freecad is None:
-			raise MalformedRepositoryError("Can not export: FreeCAD Backend is not active")
+			raise MalformedRepositoryError(
+				"Can not export: FreeCAD Backend is not active")
 		freecad = repo.freecad
 
 		repo_path = freecad.repo_root
