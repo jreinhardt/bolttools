@@ -8,3 +8,8 @@ http://jreinhardt.github.io/BOLTS/index.html
 and
 
 https://github.com/jreinhardt/BOLTS
+
+Dependencies
+------------
+
+YAML: http://pyyaml.org/
