@@ -13,18 +13,20 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import string
 from os import listdir,makedirs
-from os.path import join, exists, basename,splitext
-from shutil import rmtree,copytree
+from os.path import join,basename,splitext
+from shutil import copytree
+# pylint: disable=W0622
 from codecs import open
 
 import freecad,openscad
 from common import BackendData, BackendExporter, html_table
+from errors import *
 
 def prop_row(props,prop,value):
-	props.append("<tr><th><strong>%s:</strong></th><td>%s</td></tr>" %(prop,value))
+	props.append("<tr><th><strong>%s:</strong></th><td>%s</td></tr>" %
+		(prop,value))
 
 class HTMLData(BackendData):
 	def __init__(self,path):
@@ -32,13 +34,14 @@ class HTMLData(BackendData):
 		self.template_root = join(self.backend_root,"template")
 
 class HTMLExporter(BackendExporter):
+	def __init__(self):
+		self.templates = {}
 	def write_output(self,repo):
 		if repo.html is None:
 			raise MalformedRepositoryError("Can not export: HTML Backend is not active")
 		html = repo.html
 
 		#load templates
-		self.templates = {}
 		for filename in listdir(html.template_root):
 			name = splitext(basename(filename))[0]
 			template_path = join(html.template_root,filename)
@@ -66,12 +69,16 @@ class HTMLExporter(BackendExporter):
 		#write index
 		params = {}
 		params["title"] = "BOLTS Index"
-		data = [["<a href='collections/%s.html'>%s</a>" % (coll.id,coll.name), coll.description]
-				for coll in repo.collections]
+		data = [ [
+				"<a href='collections/%s.html'>%s</a>" % (coll.id,coll.name),
+				coll.description
+			] for coll in repo.collections]
 		header = ["Name", "Description"]
 		params["collections"] = html_table(data,header)
-		data = [["<a href='bodies/%s.html'>%s</a>" % (body,body), "Standards issued by %s" % body]
-				for body in repo.standard_bodies]
+		data = [ [
+				"<a href='bodies/%s.html'>%s</a>" % (body,body),
+				"Standards issued by %s" % body
+			] for body in repo.standard_bodies]
 		header = ["Name", "Description"]
 		params["bodies"] = html_table(data,header)
 
@@ -88,12 +95,12 @@ class HTMLExporter(BackendExporter):
 				if not name in contributors_names:
 					contributors_names.append(name)
 		if not repo.freecad is None:
-			for id, base in repo.freecad.getbase.iteritems():
+			for base in repo.freecad.getbase.values():
 				for name in base.author_names:
 					if not name in contributors_names:
 						contributors_names.append(name)
 		if not repo.openscad is None:
-			for id, base in repo.openscad.getbase.iteritems():
+			for base in repo.openscad.getbase.values():
 				for name in base.author_names:
 					if not name in contributors_names:
 						contributors_names.append(name)
@@ -133,17 +140,20 @@ class HTMLExporter(BackendExporter):
 							in_openscad = "Yes (module)"
 						elif isinstance(base,openscad.BaseSTL):
 							in_openscad = "Yes (stl)"
-				if (cl.id in repo.freecad.getbase) and (cl.id in repo.openscad.getbase):
+				if ((cl.id in repo.freecad.getbase) and
+					(cl.id in repo.openscad.getbase)):
 					continue
 #					status.append("complete")
-				elif (not cl.id in repo.freecad.getbase) or (not cl.id in repo.openscad.getbase):
+				elif ((not cl.id in repo.freecad.getbase) or 
+					(not cl.id in repo.openscad.getbase)):
 					status.append("partial")
 					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 				else:
 					status.append("none")
 					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 
-		params["basetable"] = html_table(rows,["Class id","Standards","FreeCAD","OpenSCAD"],status)
+		header = ["Class id","Standards","FreeCAD","OpenSCAD"]
+		params["basetable"] = html_table(rows,header,status)
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
@@ -156,10 +166,12 @@ class HTMLExporter(BackendExporter):
 		params["title"] = coll.name
 		params["description"] = coll.description or "No description available"
 
-		params["author"] = " and <br>".join(["<a href='mailto:%s'>%s</a>" % (m,n) \
-				for m,n in zip(coll.author_mails,coll.author_names)])
+		author_links = ["<a href='mailto:%s'>%s</a>" % (m,n)
+			for m,n in zip(coll.author_mails,coll.author_names)]
+		params["author"] = " and <br>".join(author_links)
 
-		params["license"] = "<a href='%s'>%s</a>" % (coll.license_url,coll.license_name)
+		params["license"] = "<a href='%s'>%s</a>" % \
+			(coll.license_url,coll.license_name)
 
 		data = [["<a href='../classes/%s.html'>%s</a>" % (cl.name,cl.name),
 				cl.description,
@@ -202,21 +214,26 @@ class HTMLExporter(BackendExporter):
 
 		for mail,name in zip(coll.author_mails,coll.author_names):
 			prop_row(props,"Author","<a href='mailto:%s'>%s</a>" % (mail,name))
-		prop_row(props,"License","<a href='%s'>%s</a>" % (coll.license_url,coll.license_name))
-		prop_row(props,"Collection","<a href='../collections/%s.html'>%s</a>" % (coll.id,coll.name))
+		prop_row(props,"License","<a href='%s'>%s</a>" %
+			(coll.license_url,coll.license_name))
+		prop_row(props,"Collection","<a href='../collections/%s.html'>%s</a>" %
+				(coll.id,coll.name))
 
 		if not cl.standard is None:
-			identical = ", ".join(["<a href='%s.html'>%s</a>" % (id,id) for id in cl.standard if id != cl.name])
+			identical = ", ".join(["<a href='%s.html'>%s</a>" % (id,id)
+				for id in cl.standard if id != cl.name])
 			prop_row(props,"Identical to",identical)
 
 			prop_row(props,"Status",cl.status)
-			prop_row(props,"Standard body","<a href='../bodies/%s.html'>%s</a>" % (cl.body,cl.body))
+			prop_row(props,"Standard body","<a href='../bodies/%s.html'>%s</a>" %
+				(cl.body,cl.body))
 			if not cl.replaces is None:
-				prop_row(props,"Replaces","<a href='%s.html'>%s</a>" % (cl.replaces,cl.replaces))
+				prop_row(props,"Replaces","<a href='%s.html'>%s</a>" %
+					(cl.replaces,cl.replaces))
 
 			if not cl.replacedby is None:
-				prop_row(props,"Replaced by","<a href='%s.html'>%s</a>" % (cl.replacedby,cl.replacedby))
-
+				prop_row(props,"Replaced by","<a href='%s.html'>%s</a>" %
+					(cl.replacedby,cl.replacedby))
 
 		if cl.url:
 			prop_row(props,"Url",cl.url)
@@ -232,7 +249,7 @@ class HTMLExporter(BackendExporter):
 			if "M" in [str(v)[0] for v in table.data.keys()]:
 				try:
 					keys = sorted(table.data.keys(),key=lambda x: float(x[1:]))
-				except:
+				except ValueError:
 					keys = sorted(table.data.keys())
 			data = [[key] + table.data[key] for key in keys]
 			header = [str(p) for p in [table.index] + table.columns]
@@ -250,8 +267,10 @@ class HTMLExporter(BackendExporter):
 				elif isinstance(base,freecad.BaseFcstd):
 					prop_row(freecad_props,"Type","FCstd file")
 				for mail,name in zip(base.author_mails,base.author_names):
-					prop_row(freecad_props,"Author","<a href='mailto:%s'>%s</a>" % (mail,name))
-				prop_row(freecad_props,"License","<a href='%s'>%s</a>" % (base.license_url,base.license_name))
+					prop_row(freecad_props,"Author","<a href='mailto:%s'>%s</a>" % 
+						(mail,name))
+				prop_row(freecad_props,"License","<a href='%s'>%s</a>" %
+					(base.license_url,base.license_name))
 				params["freecad"] = "\n".join(freecad_props)
 			else:
 				params["freecad"] = "<tr><td>Class is not available in FreeCAD</td></tr>\n"
@@ -269,16 +288,19 @@ class HTMLExporter(BackendExporter):
 				elif isinstance(base,openscad.BaseSTL):
 					prop_row(openscad_props,"Type","STL file")
 				for mail,name in zip(base.author_mails,base.author_names):
-					prop_row(openscad_props,"Author","<a href='mailto:%s'>%s</a>" % (mail,name))
-				prop_row(openscad_props,"License","<a href='%s'>%s</a>" % (base.license_url,base.license_name))
+					prop_row(openscad_props,"Author","<a href='mailto:%s'>%s</a>" %
+						(mail,name))
+				prop_row(openscad_props,"License","<a href='%s'>%s</a>" %
+					(base.license_url,base.license_name))
 				params["openscad"] = "\n".join(openscad_props)
 
 				params["openscadincantation"] = "<h2>Incantation</h2>\n"
 				params["openscadincantation"] += "{% highlight python %}\n"
-				params["openscadincantation"] += "%s;\n" % openscad.get_incantation(cl,cl.parameters.union(base.parameters))
+				params["openscadincantation"] += "%s;\n" % \
+					openscad.get_incantation(cl,cl.parameters.union(base.parameters))
 				params["openscadincantation"] += "{% endhighlight %}\n"
 			else:
-				params["openscad"] = "<tr><td>Class is not available in OpenSCAD</td></tr>\n"
+				params["openscad"] = "<tr><td>Class not available in OpenSCAD</td></tr>\n"
 				params["openscadincantation"] = ""
 
 
