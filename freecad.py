@@ -51,6 +51,7 @@ class BaseFunction(FreeCADBase):
 		else:
 			self.parameters = BOLTSParameters({})
 	def _check_conformity(self,function, basefile):
+		# pylint: disable=R0201
 		check_dict(function,SPEC["function"])
 		check_dict(basefile,SPEC["file-function"])
 	def add_part(self,params,doc):
@@ -70,8 +71,9 @@ class BaseFcstd(FreeCADBase):
 			self.parameters = BOLTSParameters(obj["parameters"])
 		else:
 			self.parameters = BOLTSParameters({})
-	
+
 	def _check_conformity(self,obj,basefile):
+		# pylint: disable=R0201
 		check_dict(basefile,SPEC["file-fcstd"])
 		check_dict(obj,SPEC["object"])
 
@@ -177,6 +179,8 @@ class FreeCADData(BackendData):
 							raise e
 
 class FreeCADExporter(BackendExporter):
+	def __init__(self):
+		pass
 	def write_output(self,repo):
 		if repo.freecad is None:
 			raise MalformedRepositoryError(
