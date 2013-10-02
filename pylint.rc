@@ -33,7 +33,7 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=W0403,I0011,W0401
+disable=W0403,I0011,W0401,C0324,W0614
 
 
 [REPORTS]
@@ -200,7 +200,7 @@ max-locals=15
 max-returns=6
 
 # Maximum number of branch for function / method body
-max-branchs=12
+max-branchs=20
 
 # Maximum number of statements in function / method body
 max-statements=50
@@ -209,7 +209,7 @@ max-statements=50
 max-parents=7
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=7
+max-attributes=20
 
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=0
