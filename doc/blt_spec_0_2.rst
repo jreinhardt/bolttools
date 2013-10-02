@@ -85,8 +85,8 @@ in the repository.
 The drawings directory
 ======================
 
-The drawings directory contains a number of subdirectories, usually one for
-each collection. In each of these directories, drawings of the parts are
+The drawings directory contains a number of subdirectories, one for
+each collection. In each of these directories, drawings of the parts can be
 stored, that illustrate the geometries of the parts and the meaning of the
 parameters.
 
