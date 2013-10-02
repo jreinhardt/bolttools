@@ -80,3 +80,8 @@ class UncommitedChangesError(Exception):
 	def __str__(self):
 		return "There are uncommited changes in the git repo"
 
+class NonUniqueClassIdError(Exception):
+	def __init__(self,id):
+		self.id = id
+	def __str__(self):
+		return "Encountered more than one class with the same id: %s" % self.id

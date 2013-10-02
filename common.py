@@ -17,19 +17,19 @@
 
 import re
 from os import listdir,makedirs, remove
-from os.path import join, exists, basename, isfile
-from shutil import rmtree,copy
+from os.path import join, exists, isfile
+from shutil import rmtree
 from copy import deepcopy
 
 from errors import *
 
-_specification = {
+SPEC = {
 	"naming" : (["template"],["substitute"]),
 	"parameters" : ([],["literal","free","tables","types","defaults"]),
 	"table" : (["index","columns","data"],[])
 }
 
-_re_angled = re.compile("([^<]*)<([^>]*)")
+RE_ANGLED = re.compile("([^<]*)<([^>]*)")
 
 #inspired by html.py but avoiding the dependency
 def html_table(table_data,header=None,row_classes=None):
@@ -70,8 +70,8 @@ class BOLTSParameters:
 		self.tables = []
 		if "tables" in param:
 			if isinstance(param["tables"],list):
-				for t in param["tables"]:
-					self.tables.append(BOLTSTable(t))
+				for table in param["tables"]:
+					self.tables.append(BOLTSTable(table))
 			else:
 				self.tables.append(BOLTSTable(param["tables"]))
 
@@ -82,9 +82,9 @@ class BOLTSParameters:
 		self.parameters = []
 		self.parameters += self.literal.keys()
 		self.parameters += self.free
-		for t in self.tables:
-			self.parameters.append(t.index)
-			self.parameters += t.columns
+		for table in self.tables:
+			self.parameters.append(table.index)
+			self.parameters += table.columns
 		#remove duplicates
 		self.parameters = list(set(self.parameters))
 
@@ -92,32 +92,33 @@ class BOLTSParameters:
 		all_types = ["Length (mm)", "Length (in)", "Number",
 			"Bool", "Table Index", "String"]
 		
-		for k,t in self.types.iteritems():
-			if not k in self.parameters:
-				raise ValueError("Unknown parameter in types: %s" % k)
-			if not t in all_types:
-				raise ValueError("Unknown type in types: %s" % t)
+		for pname,tname in self.types.iteritems():
+			if not pname in self.parameters:
+				raise ValueError("Unknown parameter in types: %s" % pname)
+			if not tname in all_types:
+				raise ValueError("Unknown type in types: %s" % tname)
 
 		#fill in defaults for types
-		for p in self.parameters:
-			if not p in self.types:
-				self.types[p] = "Length (mm)"
+		for pname in self.parameters:
+			if not pname in self.types:
+				self.types[pname] = "Length (mm)"
 
 		#check and normalize tables
-		for t in self.tables:
-			t._normalize_and_check_types(self.types)
+		for table in self.tables:
+			table._normalize_and_check_types(self.types)
 
 		#default values for free parameters
-		self.defaults = {p:self.type_defaults[self.types[p]] for p in self.free}
+		self.defaults = {pname : self.type_defaults[self.types[pname]]
+			for pname in self.free}
 		if "defaults" in param:
-			for p in param["defaults"]:
-				if p not in self.free:
-					raise ValueError("Default value given for non-free parameter");
-				self.defaults[p] = param["defaults"][p]
+			for pname in param["defaults"]:
+				if pname not in self.free:
+					raise ValueError("Default value given for non-free parameter")
+				self.defaults[pname] = param["defaults"][pname]
 
 	def _check_conformity(self,param):
-		spec = _specification
-		check_dict(param,spec["parameters"])
+		# pylint: disable=R0201
+		check_dict(param,SPEC["parameters"])
 
 	def collect(self,free):
 		res = {}
@@ -125,9 +126,9 @@ class BOLTSParameters:
 		res.update(free)
 		for table in self.tables:
 			res.update(dict(zip(table.columns,table.data[res[table.index]])))
-		for p in self.parameters:
-			if not p in res:
-				raise KeyError("Parameter value not collected: %s" % p)
+		for pname in self.parameters:
+			if not pname in res:
+				raise KeyError("Parameter value not collected: %s" % pname)
 		return res
 
 	def union(self,other):
@@ -137,14 +138,14 @@ class BOLTSParameters:
 		res.free = self.free + other.free
 		res.tables = self.tables + other.tables
 		res.parameters = list(set(self.parameters))
-		for k,v in self.types.iteritems():
-			res.types[k] = v
-		for k,v in other.types.iteritems():
-			res.types[k] = v
-		for k,v in self.defaults.iteritems():
-			res.defaults[k] = v
-		for k,v in other.defaults.iteritems():
-			res.defaults[k] = v
+		for pname,tname in self.types.iteritems():
+			res.types[pname] = tname
+		for pname,tname in other.types.iteritems():
+			res.types[pname] = tname
+		for pname,tname in self.defaults.iteritems():
+			res.defaults[pname] = tname
+		for pname,tname in other.defaults.iteritems():
+			res.defaults[pname] = tname
 		return res
 
 class BOLTSTable:
@@ -155,8 +156,8 @@ class BOLTSTable:
 		self.data = deepcopy(table["data"])
 
 	def _check_conformity(self,table):
-		spec = _specification
-		check_dict(table,spec["table"])
+		# pylint: disable=R0201
+		check_dict(table,SPEC["table"])
 
 	def _normalize_and_check_types(self,types):
 		numbers = ["Length (mm)", "Length (in)", "Number"]
@@ -166,17 +167,17 @@ class BOLTSTable:
 		idx = range(len(self.columns))
 		for key in self.data:
 			row = self.data[key]
-			for i,t in zip(idx,col_types):
+			for i,tname in zip(idx,col_types):
 				if row[i] == "None":
 					row[i] = None
 				else:
-					if t in numbers:
+					if tname in numbers:
 						row[i] = float(row[i])
-					elif not t in rest:
-						raise ValueError("Unknown Type in table: %s" % t)
-					if t in positive and row[i] < 0:
+					elif not tname in rest:
+						raise ValueError("Unknown Type in table: %s" % tname)
+					if tname in positive and row[i] < 0:
 						raise ValueError("Negative length in table: %f" % row[i])
-					if t == "Bool":
+					if tname == "Bool":
 						row[i] = bool(row[i])
 
 class BOLTSNaming:
@@ -188,8 +189,8 @@ class BOLTSNaming:
 			self.substitute = name["substitute"]
 
 	def _check_conformity(self,name):
-		spec = _specification
-		check_dict(name,spec["naming"])
+		# pylint: disable=R0201
+		check_dict(name,SPEC["naming"])
 
 	def get_name(self,params):
 		return self.template % (params[s] for s in self.substitute)
@@ -206,6 +207,7 @@ class BackendExporter:
 	def __init__(self):
 		pass
 	def clear_output_dir(self,backend_data):
+		# pylint: disable=R0201
 		if not exists(backend_data.out_root):
 			makedirs(backend_data.out_root)
 		for path in listdir(backend_data.out_root):
@@ -226,11 +228,11 @@ class BaseBase:
 		self.author_names = []
 		self.author_mails = []
 		for author in self.authors:
-			match = _re_angled.match(author)
+			match = RE_ANGLED.match(author)
 			self.author_names.append(match.group(1).strip())
 			self.author_mails.append(match.group(2).strip())
 
 		self.license = basefile["license"]
-		match = _re_angled.match(self.license)
+		match = RE_ANGLED.match(self.license)
 		self.license_name = match.group(1).strip()
 		self.license_url = match.group(2).strip()

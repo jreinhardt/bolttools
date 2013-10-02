@@ -30,6 +30,9 @@ class TestRepositoryLoad(unittest.TestCase):
 
 	def test_small(self):
 		repo = blt_parser.BOLTSRepository("test_repos/small")
+		self.assertFalse(repo.openscad is None)
+		self.assertFalse(repo.freecad is None)
+		self.assertFalse(repo.html is None)
 
 
 class TestCollectionLoad(unittest.TestCase):
@@ -59,7 +62,8 @@ class TestCollectionLoad(unittest.TestCase):
 		self.assertEqual(coll.author_names,["Johannes Reinhardt"])
 		self.assertEqual(coll.author_mails,["jreinhardt@ist-dein-freund.de"])
 		self.assertEqual(coll.license_name,"CC-BY-SA")
-		self.assertEqual(coll.license_url,"http://creativecommons.org/licenses/by-sa/3.0/")
+		self.assertEqual(coll.license_url,
+			"http://creativecommons.org/licenses/by-sa/3.0/")
 
 		cl = coll.classes[0]
 		self.assertEqual(cl.naming.template,"Partname")
@@ -123,7 +127,7 @@ class TestOpenSCADGeneration(unittest.TestCase):
 
 class TestFreeCADGeneration(unittest.TestCase):
 	def test_data_init(self):
-		scad = freecad.FreeCADData("test_repos/small")
+		freecad.FreeCADData("test_repos/small")
 
 	def test_fcstd(self):
 		repo = blt_parser.BOLTSRepository("test_repos/fcstd")
@@ -136,7 +140,7 @@ class TestFreeCADGeneration(unittest.TestCase):
 
 class TestHTMLGeneration(unittest.TestCase):
 	def test_data_init(self):
-		html_data = html.HTMLData("test_repos/small")
+		html.HTMLData("test_repos/small")
 	def test_export(self):
 		#small
 		repo = blt_parser.BOLTSRepository("test_repos/small")

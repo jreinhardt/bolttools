@@ -15,16 +15,14 @@
 
 import yaml
 import os
-import re
 from os.path import splitext, split, exists, join
 # pylint: disable=W0622
 from codecs import open
 
 import openscad,freecad, html, downloads
 from errors import *
-from common import BOLTSParameters, BOLTSNaming
+from common import BOLTSParameters, BOLTSNaming, RE_ANGLED
 
-RE_ANGLED = re.compile("([^<]*)<([^>]*)")
 
 CURRENT_VERSION = 0.2
 
