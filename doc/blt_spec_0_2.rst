@@ -520,5 +520,9 @@ Document. It has the following keys:
   These parameters allow to represent additional paramters, which are not
   specific to the class, but to the base. This allows e.g. to let the user
   choose  between a detailed and a schematic representation of the part.
-- paramtoprop: optional, associative array. This maps parameters to properties
-  of the object. Defaults to {"name" : "Label"}
+- proptoparam: optional, associative array of associative arrays. This maps
+  properties of objects to parameters. Keys to the first level of associative
+  arrays are the object names in the source file, keys to the second level are
+  the names of the properties and the values are the names of the parameter as
+  specified in a parameter-element_. Defaults to {objectname : {"Label" :
+  "name"}}

@@ -27,7 +27,7 @@ _specification = {
 	"file-function" : (["filename","author","license","type","functions"],[]),
 	"file-fcstd" : (["filename","author","license","type","objects"],[]),
 	"function" : (["name","classids"],["parameters"]),
-	"object" : (["objectname","classids"],["paramtoprop","parameters"]),
+	"object" : (["objectname","classids"],["proptoparam","parameters"]),
 }
 
 class FreeCADBase(BaseBase):
@@ -62,9 +62,9 @@ class BaseFcstd(FreeCADBase):
 		self._check_conformity(obj,basefile)
 		FreeCADBase.__init__(self,basefile,collname,backend_root)
 		self.objectname = obj["objectname"]
-		self.paramtoprop = {"name" : "Label"}
-		if "paramtoprop" in obj:
-			self.paramtoprop = obj["paramtoprop"]
+		self.proptoparam = {self.objectname : {"Label" : "name"}}
+		if "proptoparam" in obj:
+			self.proptoparam = obj["proptoparam"]
 		if "parameters" in obj:
 			self.parameters = BOLTSParameters(obj["parameters"])
 		else:
@@ -75,31 +75,60 @@ class BaseFcstd(FreeCADBase):
 		check_dict(basefile,spec["file-fcstd"])
 		check_dict(obj,spec["object"])
 
-	def _recursive_copy(self,obj,doc):
-		obj_copy = doc.copyObject(obj)
-		for prop_name in obj.PropertiesList:
-			prop = obj.getPropertyByName(prop_name)
-			prop_copy = obj_copy.getPropertyByName(prop_name)
-			if prop_copy is None and (not prop is None):
-				setattr(obj_copy,prop_name,self._recursive_copy(prop,doc))
+	def _recursive_copy(self,src_obj,dst_doc,srcdstmap):
+		import FreeCAD, FreeCADGui
+		import Part, Sketcher
+
+		if src_obj.Name in srcdstmap:
+			return srcdstmap[src_obj.Name]
+		obj_copy = dst_doc.copyObject(src_obj)
+		srcdstmap[src_obj.Name] = obj_copy
+		for prop_name in src_obj.PropertiesList:
+			prop = src_obj.getPropertyByName(prop_name)
+			if isinstance(prop,tuple) or isinstance(prop,list):
+				new_prop = []
+				for p in prop:
+					if isinstance(p,Part.Feature):
+						new_prop.append(self._recursive_copy(p,dst_doc,srcdstmap))
+					elif isinstance(p,Sketcher.Sketch):
+						new_prop.append(dst_doc.copyObject(p))
+					else:
+						new_prop.append(p)
+				if isinstance(prop,tuple):
+					new_prop = tuple(new_prop)
+				setattr(obj_copy,prop_name,new_prop)
+			elif isinstance(prop,Sketcher.Sketch):
+				setattr(obj_copy,prop_name,dst_doc.copyObject(prop))
+			elif isinstance(prop,Part.Feature):
+				setattr(obj_copy,prop_name,self._recursive_copy(prop,dst_doc,srcdstmap))
+			else:
+				setattr(obj_copy,prop_name,src_obj.getPropertyByName(prop_name))
+		obj_copy.touch()
+		FreeCADGui.getDocument(dst_doc.Name).getObject(obj_copy.Name).Visibility = False
 		return obj_copy
 
 	def add_part(self,params,doc):
-		import FreeCAD
-		#copy the object and all its dependencies
-		newdoc = FreeCAD.openDocument(self.filename)
-		obj = newdoc.getObject(self.objectname)
-		if obj is None:
+		import FreeCAD, FreeCADGui
+		#copy part to doc
+		src_doc = FreeCAD.openDocument(self.filename)
+		src_obj = src_doc.getObject(self.objectname)
+		if src_obj is None:
 			raise MalformedBaseError("No object %s found" % self.objectname)
-		obj_copy = self._recursive_copy(obj,doc)
-		FreeCAD.setActiveDocument(doc.Name)
-		FreeCAD.closeDocument(newdoc.Name)
+		#maps source name to destination object
+		srcdstmap = {}
+		dst_obj = self._recursive_copy(src_obj,doc,srcdstmap)
 
-		for param,prop in self.paramtoprop.iteritems():
-			setattr(obj_copy,prop,params[param])
+		#set parameters
+		for obj_name,proptoparam in self.proptoparam.iteritems():
+			for prop,param in proptoparam.iteritems():
+				setattr(srcdstmap[obj_name],prop,params[param])
 
-		obj_copy.touch()
+		#finish presentation
+		dst_obj.touch()
 		doc.recompute()
+		FreeCADGui.getDocument(doc.Name).getObject(dst_obj.Name).Visibility = True
+		FreeCAD.setActiveDocument(doc.Name)
+		FreeCAD.closeDocument(src_doc.Name)
 
 
 class FreeCADData(BackendData):

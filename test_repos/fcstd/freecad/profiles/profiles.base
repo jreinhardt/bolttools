@@ -6,5 +6,6 @@
   objects:
    - objectname: Pad
      classids: [tuberect]
-     paramtoprop: {name : Label, l : Length}
+     proptoparam:
+       Pad : {Label : name, Length : l}
 ...
