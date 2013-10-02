@@ -17,21 +17,24 @@ import yaml
 import os
 import re
 from os.path import splitext, split, exists, join
+# pylint: disable=W0622
 from codecs import open
 
 import openscad,freecad, html, downloads
 from errors import *
 from common import BOLTSParameters, BOLTSNaming
 
-_re_angled = re.compile("([^<]*)<([^>]*)")
+RE_ANGLED = re.compile("([^<]*)<([^>]*)")
 
-current_version = 0.2
+CURRENT_VERSION = 0.2
 
 #this is not super-precise, but allows to do some rough checks
-_specification = {
+SPEC = {
 	"root" : (["collection","classes"],[]),
 	"collection" : (["author","license","blt-version"],["name","description"]),
-	"class" : (["naming","source","id"],["drawing","description","standard","status","replaces","parameters","url","notes"]),
+	"class" : (["naming","source","id"],
+		["drawing","description","standard","status","replaces","parameters",
+		"url","notes"]),
 }
 
 class BOLTSRepository:
@@ -112,7 +115,7 @@ class BOLTSCollection:
 		self._check_conformity(coll)
 
 		version = coll["collection"]["blt-version"]
-		if version != current_version:
+		if version != CURRENT_VERSION:
 			raise VersionError(version)
 
 		#parse header
@@ -132,12 +135,12 @@ class BOLTSCollection:
 		self.author_names = []
 		self.author_mails = []
 		for author in self.authors:
-			match = _re_angled.match(author)
+			match = RE_ANGLED.match(author)
 			self.author_names.append(match.group(1).strip())
 			self.author_mails.append(match.group(2).strip())
 
 		self.license = header["license"]
-		match = _re_angled.match(self.license)
+		match = RE_ANGLED.match(self.license)
 		self.license_name = match.group(1).strip()
 		self.license_url = match.group(2).strip()
 
@@ -174,9 +177,9 @@ class BOLTSCollection:
 		return id
 
 	def _check_conformity(self,coll):
-		spec = _specification
-		check_dict(coll,spec["root"])
-		check_dict(coll["collection"],spec["collection"])
+		# pylint: disable=R0201
+		check_dict(coll,SPEC["root"])
+		check_dict(coll["collection"],SPEC["collection"])
 		classes = coll["classes"]
 		if not isinstance(classes,list):
 			raise MalformedCollectionError("No class in collection %s"% self.id)
@@ -241,6 +244,6 @@ class BOLTSClass:
 		self.name = name
 
 	def _check_conformity(self,cl):
-		spec = _specification
-		check_dict(cl,spec["class"])
+		# pylint: disable=R0201
+		check_dict(cl,SPEC["class"])
 
