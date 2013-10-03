@@ -156,6 +156,20 @@ class HTMLExporter(BackendExporter):
 		header = ["Class id","Standards","FreeCAD","OpenSCAD"]
 		params["basetable"] = html_table(rows,header,status)
 
+		#find missing images
+		rows = []
+		classids = []
+		for coll in repo.collections:
+			for cl in coll.classes:
+				if cl.drawing is None:
+					if cl.id in classids:
+						continue
+					rows.append([cl.id, str(cl.standard), coll.id])
+					classids.append(cl.id)
+
+		header = ["Class id","Standards","Collection id"]
+		params["drawingtable"] = html_table(rows,header)
+
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
 		fid.close()
