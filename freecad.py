@@ -194,7 +194,7 @@ class FreeCADExporter(BackendExporter):
 		self.clear_output_dir(freecad)
 
 		#generate macro
-		start_macro = open(join(out_path,"start_bolts.py"),"w")
+		start_macro = open(join(out_path,"start_bolts.FCMacro"),"w")
 		start_macro.write("import BOLTS\n")
 		start_macro.close()
 
