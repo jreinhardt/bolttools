@@ -114,6 +114,26 @@ class HTMLExporter(BackendExporter):
 		fid.write(self.templates["contributors"].substitute(params))
 		fid.close()
 
+		#write statistics
+		params = {}
+		params["classes"] = 0
+		params["collections"] = 0
+		params["standards"] = 0
+		for coll in repo.collections:
+			params["collections"] += 1
+			for cl in coll.classes:
+				params["classes"] += 1
+				if not cl.standard is None:
+					params["standards"] += len(cl.standard)
+		params["bodies"] = len(repo.standard_bodies)
+		params["contributors"] = len(contributors_names)
+		for key in params:
+			params[key] = str(params[key])
+
+		fid = open(join(html.out_root,"statistics.html"),'w','utf8')
+		fid.write(self.templates["statistics"].substitute(params))
+		fid.close()
+
 		#write base overview
 		rows = []
 		status = []
