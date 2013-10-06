@@ -204,4 +204,5 @@ class FreeCADExporter(BackendExporter):
 		copytree(join(repo_path,"bolttools"),join(bolts_path,"bolttools"))
 		copytree(join(repo_path,"drawings"),join(bolts_path,"drawings"))
 		copytree(join(repo_path,"freecad"),join(bolts_path,"freecad"))
+		copytree(join(repo_path,"icons"),join(bolts_path,"icons"))
 		copy(join(repo_path,"__init__.py"),bolts_path)
