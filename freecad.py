@@ -196,6 +196,7 @@ class FreeCADExporter(BackendExporter):
 		#generate macro
 		start_macro = open(join(out_path,"start_bolts.FCMacro"),"w")
 		start_macro.write("import BOLTS\n")
+		start_macro.write("BOLTS.widget.show()\n")
 		start_macro.close()
 
 		#copy files
