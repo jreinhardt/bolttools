@@ -37,7 +37,7 @@ SPEC = {
 
 class BOLTSRepository:
 	#order is important
-	standard_bodies = ["DINENISO","DINEN","DINISO","DIN","EN","ISO"]
+	standard_bodies = ["DINENISO","DINEN","DINISO","DIN","EN","ISO","ANSI","ASME"]
 	def __init__(self,path):
 		self.path = path
 		self.collections = []
@@ -240,6 +240,7 @@ class BOLTSClass:
 		self.source = cl["source"]
 
 		self.name = name
+		self.openscadname = name.replace("-","_").replace(" ","_").replace(".","_")
 
 	def _check_conformity(self,cl):
 		# pylint: disable=R0201

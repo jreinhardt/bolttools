@@ -37,7 +37,7 @@ def get_incantation(cl,params):
 			arg_strings.append('%s="%s"' % (pname,params.defaults[pname]))
 		else:
 			arg_strings.append('%s=%s' % (pname,params.defaults[pname]))
-	return '%s(%s)' % (cl.name.replace("-","_"), ', '.join(arg_strings))
+	return '%s(%s)' % (cl.openscadname, ', '.join(arg_strings))
 
 class OpenSCADBase(BaseBase):
 	def __init__(self,basefile,collname):
@@ -193,7 +193,7 @@ class OpenSCADExporter(BackendExporter):
 			for cl in collection.classes:
 				if not cl.id in repo.openscad.getbase:
 					continue
-				table_path = join("tables","%s_table.scad" % cl.name.replace("-","_"))
+				table_path = join("tables","%s_table.scad" % cl.openscadname)
 				table_filename = join(out_path,table_path)
 				fid = open(table_filename,"w","utf8")
 				self.write_table(fid,collection,cl)
@@ -226,7 +226,7 @@ class OpenSCADExporter(BackendExporter):
 
 			data = table.data
 
-			fid.write("function %s_table_%d(key) = \n" % (cl.name.replace("-","_"),i))
+			fid.write("function %s_table_%d(key) = \n" % (cl.openscadname,i))
 			fid.write("//%s\n" % ", ".join(table.columns))
 			for k,values in data.iteritems():
 				data = ["None" if v is None else v for v in values]
@@ -234,6 +234,7 @@ class OpenSCADExporter(BackendExporter):
 			fid.write('"Error";\n\n')
 
 	def write_stub(self,repo,fid,cl):
+		units = {"Length (mm)" : "mm", "Length (in)" : "in"}
 		#collect textual parameter representations
 		args = {}
 		if not cl.standard is None:
@@ -245,7 +246,8 @@ class OpenSCADExporter(BackendExporter):
 		args.update(params.literal)
 		for table,i in zip(params.tables,range(len(params.tables))):
 			for pname,j in zip(table.columns,range(len(table.columns))):
-				args[pname] = 'measures_%d[%d]' % (i,j)
+				unit = units[params.types[pname]]
+				args[pname] = 'convert_to_default_unit(measures_%d[%d],"%s")' % (i,j,unit)
 
 		#incantation
 		fid.write("module %s{\n" % get_incantation(cl,params))
@@ -266,7 +268,7 @@ it might be better to use its successor %s instead");\n""" %
 		#load table data
 		for table,i in zip(cl.parameters.tables,range(len(cl.parameters.tables))):
 			fid.write('\tmeasures_%d = %s_table_%d(%s);\n' %
-				(i,cl.name.replace("-","_"),i,table.index))
+				(i,cl.openscadname,i,table.index))
 			fid.write('\tif(measures_%d == "Error"){\n' % i)
 			fid.write('\t\techo("TableLookUpError in %s, table %d");\n\t}\n' %
 				(cl.name,i))
