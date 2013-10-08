@@ -287,7 +287,16 @@ class HTMLExporter(BackendExporter):
 				except ValueError:
 					keys = sorted(table.data.keys())
 			data = [[key] + table.data[key] for key in keys]
-			header = [str(p) for p in [table.index] + table.columns]
+
+			lengths = {"Length (mm)" : "mm", "Length (in)" : "in"}
+
+			header = [str(table.index)]
+			for p in table.columns:
+				if cl.parameters.types[p] in lengths:
+					header.append("%s (%s)" % (str(p), lengths[cl.parameters.types[p]]))
+				else:
+					header.append("%s" % str(p))
+
 			params["dimensions"] += html_table(data,header)
 
 		#freecad information
