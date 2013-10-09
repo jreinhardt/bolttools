@@ -163,9 +163,14 @@ class OpenSCADExporter(BackendExporter):
 		for filename in listdir(join(oscad.backend_root,"common")):
 			copy(join(oscad.backend_root,"common",filename),
 				join(out_path,"common",filename))
-			bolts_fid.write("include <common/%s>\n" % filename)
-			for std in standard_fids:
-				standard_fids[std].write("include <common/%s>\n" % filename)
+			if filename == "conf.scad":
+				bolts_fid.write("include <common/%s>\n" % filename)
+				for std in standard_fids:
+					standard_fids[std].write("include <common/%s>\n" % filename)
+			else:
+				bolts_fid.write("use <common/%s>\n" % filename)
+				for std in standard_fids:
+					standard_fids[std].write("use <common/%s>\n" % filename)
 
 		#copy base files
 		copied = []
@@ -183,9 +188,9 @@ class OpenSCADExporter(BackendExporter):
 			for path in oscad.getbase[id].get_include_files():
 				if path in included:
 					continue
-				bolts_fid.write("include <base/%s>\n" % path)
+				bolts_fid.write("use <base/%s>\n" % path)
 				for std in standard_fids:
-					standard_fids[std].write("include <base/%s>\n" % path)
+					standard_fids[std].write("use <base/%s>\n" % path)
 				included.append(path)
 
 		#write tables
@@ -199,10 +204,10 @@ class OpenSCADExporter(BackendExporter):
 				self.write_table(fid,collection,cl)
 				fid.close()
 
-				bolts_fid.write("include <%s>\n" % table_path)
+				bolts_fid.write("use <%s>\n" % table_path)
 				for std in standard_fids:
 					if cl in repo.standardized[std]:
-						standard_fids[std].write("include <%s>\n" % table_path)
+						standard_fids[std].write("use <%s>\n" % table_path)
 		bolts_fid.write("\n\n")
 
 		#write stubs
