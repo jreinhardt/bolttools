@@ -180,6 +180,7 @@ class HTMLExporter(BackendExporter):
 		rows = []
 		rows_svg = []
 		classids = []
+		classids_svg = []
 		for coll in repo.collections:
 			for cl in coll.classes:
 				if cl.drawing is None:
@@ -188,8 +189,11 @@ class HTMLExporter(BackendExporter):
 					rows.append([cl.id, str(cl.standard), coll.id])
 					classids.append(cl.id)
 				else:
+					if cl.id in classids_svg:
+						continue
 					if not exists(join(html.repo_root,"drawings",coll.id,"%s.svg" % cl.id)):
 						rows_svg.append([cl.id, str(cl.standard), coll.id])
+						classids_svg.append(cl.id)
 
 		header = ["Class id","Standards","Collection id"]
 		params["missingdrawings"] = html_table(rows,header)
