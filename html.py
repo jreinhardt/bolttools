@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import string
-from os import listdir,makedirs
-from os.path import join,basename,splitext
+from os import listdir, makedirs
+from os.path import join, basename, splitext, exists
 from shutil import copytree
 # pylint: disable=W0622
 from codecs import open
@@ -178,6 +178,7 @@ class HTMLExporter(BackendExporter):
 
 		#find missing images
 		rows = []
+		rows_svg = []
 		classids = []
 		for coll in repo.collections:
 			for cl in coll.classes:
@@ -186,9 +187,13 @@ class HTMLExporter(BackendExporter):
 						continue
 					rows.append([cl.id, str(cl.standard), coll.id])
 					classids.append(cl.id)
+				else:
+					if not exists(join(html.repo_root,"drawings",coll.id,"%s.svg" % cl.id)):
+						rows_svg.append([cl.id, str(cl.standard), coll.id])
 
 		header = ["Class id","Standards","Collection id"]
-		params["drawingtable"] = html_table(rows,header)
+		params["missingdrawings"] = html_table(rows,header)
+		params["missingdrawingssvg"] = html_table(rows_svg,header)
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
