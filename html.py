@@ -266,7 +266,8 @@ class HTMLExporter(BackendExporter):
 		if not cl.standard is None:
 			identical = ", ".join(["<a href='%s.html'>%s</a>" % (id,id)
 				for id in cl.standard if id != cl.name])
-			prop_row(props,"Identical to",identical)
+			if identical:
+				prop_row(props,"Identical to",identical)
 
 			prop_row(props,"Status",cl.status)
 			prop_row(props,"Standard body","<a href='../bodies/%s.html'>%s</a>" %
