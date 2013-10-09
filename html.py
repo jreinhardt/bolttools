@@ -178,9 +178,8 @@ class HTMLExporter(BackendExporter):
 
 		#find missing images
 		rows = []
-		rows_svg = []
 		classids = []
-		classids_svg = []
+		nosvg = {}
 		for coll in repo.collections:
 			for cl in coll.classes:
 				if cl.drawing is None:
@@ -189,14 +188,19 @@ class HTMLExporter(BackendExporter):
 					rows.append([cl.id, str(cl.standard), coll.id])
 					classids.append(cl.id)
 				else:
-					if cl.id in classids_svg:
-						continue
-					if not exists(join(html.repo_root,"drawings",coll.id,"%s.svg" % cl.id)):
-						rows_svg.append([cl.id, str(cl.standard), coll.id])
-						classids_svg.append(cl.id)
+					svg_path = join("drawings","%s.svg" % splitext(cl.drawing)[0])
+					if svg_path in nosvg:
+						if not (cl.id, coll.id) in nosvg[svg_path]:
+							nosvg[svg_path].append((cl.id, coll.id))
+					elif not exists(join(html.repo_root,svg_path)):
+						nosvg[svg_path] = [(cl.id, coll.id)]
+
 
 		header = ["Class id","Standards","Collection id"]
 		params["missingdrawings"] = html_table(rows,header)
+
+		header = ["Drawing name","affected classes and collections"]
+		rows_svg = [[k,v] for k,v in nosvg.iteritems()]
 		params["missingdrawingssvg"] = html_table(rows_svg,header)
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
