@@ -213,6 +213,7 @@ class HTMLExporter(BackendExporter):
 		params = {}
 		params["title"] = coll.name
 		params["description"] = coll.description or "No description available"
+		params["collectionid"] = coll.id
 
 		author_links = ["<a href='mailto:%s'>%s</a>" % (m,n)
 			for m,n in zip(coll.author_mails,coll.author_names)]
@@ -283,6 +284,8 @@ class HTMLExporter(BackendExporter):
 			if not cl.replacedby is None:
 				prop_row(props,"Replaced by","<a href='%s.html'>%s</a>" %
 					(cl.replacedby,cl.replacedby))
+
+		prop_row(props,"Class ID",cl.id)
 
 		if cl.url:
 			prop_row(props,"Url",cl.url)
