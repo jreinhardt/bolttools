@@ -387,13 +387,8 @@ each file with modules.
 
 Common files that contain code that is used in several collections or base
 files can be placed in a folder called common in the openscad backend
-directory. They will be automatically included into the main file (using the
-use keyword) and copied to the distribution.
-
-All configuration options must be in the file conf.scad in the common folder,
-because this is the only file that is included using the include keyword, which
-propagates the configuration options to the global namespace when the main file
-is included.
+directory. They will be automatically included into the main file and copied to
+the distribution.
 
 
 *******
