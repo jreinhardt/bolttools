@@ -13,3 +13,8 @@ Dependencies
 ------------
 
 YAML: http://pyyaml.org/
+
+License
+-------
+
+This project is published under the GNU Lesser General Public License Version 2.1 or later.
