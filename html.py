@@ -22,6 +22,7 @@ from codecs import open
 
 import freecad,openscad
 from common import BackendData, BackendExporter, html_table
+from license import check_license
 from errors import *
 
 def prop_row(props,prop,value):
@@ -202,6 +203,42 @@ class HTMLExporter(BackendExporter):
 		header = ["Drawing name","affected classes and collections"]
 		rows_svg = [[k,v] for k,v in nosvg.iteritems()]
 		params["missingdrawingssvg"] = html_table(rows_svg,header)
+
+		#find unsupported licenses
+		rows = []
+		for coll in repo.collections:
+			if not check_license(coll.license_name,coll.license_url):
+				authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
+					for a,m in zip(coll.author_names,coll.author_mails)])
+				rows.append(["Collection", coll.id, coll.license_name, coll.license_url, authors])
+
+		bases = []
+		if not repo.freecad is None:
+			for base in repo.freecad.getbase.values():
+				if base in bases:
+					continue
+				if not check_license(base.license_name,base.license_url):
+					authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
+						for  a,m in zip(base.author_names,base.author_mails)])
+					rows.append(["FreeCAD base", base.filename, base.license_name, base.license_url, authors])
+					bases.append(base)
+
+		bases = []
+		if not repo.openscad is None:
+			for base in repo.openscad.getbase.values():
+				if base in bases:
+					continue
+				if not check_license(base.license_name,base.license_url):
+					authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
+						for  a,m in zip(base.author_names,base.author_mails)])
+					rows.append(["OpenSCAD base", base.filename, base.license_name, base.license_url, authors])
+					bases.append(base)
+
+		header = ["Type","Id/Filename","License name","License url", "Authors"]
+		params["unsupportedlicenses"] = html_table(rows,header)
+
+
+
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))

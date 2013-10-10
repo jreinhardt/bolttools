@@ -182,7 +182,8 @@ regarding the collection_. It contains the following keys:
   with e-mail in <>. If multiple authors contributed significantly to this collection
   a list of authors may be given.
 - license: mandatory, string. The name of the license for this collection and a
-  URL pointing to the full text of the license enclosed in <>.
+  URL pointing to the full text of the license enclosed in <>. Must be one of
+  the supported-licenses_.
 - blt-version: mandatory, number. The version of the blt format this collection
   follows.
 
@@ -352,7 +353,8 @@ However, there are some keys that are present in every base file element:
 - filename: mandatory, string. The filename of the file
 - author: mandatory, string or list of strings. The author of the file with
   e-mail adress in <> or a list of several authors.
-- license: mandatory, string. The license of the file
+- license: mandatory, string. The license of the file. Must be one of the
+  supported-licenses_.
 - type: mandatory, string. A string describing the type of the file.
 
 Backends support different base-file-types, for a list see list-of-base-file-types_.
@@ -414,7 +416,8 @@ It is an associative array that contains the following keys:
 - filename: mandatory, string. The filename of the file
 - author: mandatory, string or list of strings. The author of the file with
   e-mail adress in <> or a list of several authors.
-- license: mandatory, string. The license of the file
+- license: mandatory, string. The license of the file. Must be one of the
+  supported-licenses_
 - type: "module"
 - modules: mandatory, list of base-module-element_. A list of base module
   elements describing the modules in the file.
@@ -452,7 +455,8 @@ the STL format. It is an associative array with the following keys:
 - filename: mandatory, string. The filename of the file
 - author: mandatory, string or list of strings. The author of the file with
   e-mail adress in <> or a list of several authors.
-- license: mandatory, string. The license of the file
+- license: mandatory, string. The license of the file. Must be either "CC0
+  1.0" or "Public Domain".
 - type: "stl"
 - classids: mandatory, list of string. A list of class ids for which this base
   module should be used.
@@ -469,7 +473,8 @@ associative array with the following keys:
 - filename: mandatory, string. The filename of the file
 - author: mandatory, string or list of strings. The author of the file with
   e-mail adress in <> or a list of several authors.
-- license: mandatory, string. The license of the file
+- license: mandatory, string. The license of the file. Must be one of the
+  supported-licenses_.
 - type: "function"
 - functions: mandatory, list of base-function-element_.
 
@@ -501,7 +506,8 @@ associative array with the following keys:
 - filename: mandatory, string. The filename of the file
 - author: mandatory, string or list of strings. The author of the file with
   e-mail adress in <> or a list of several authors.
-- license: mandatory, string. The license of the file
+- license: mandatory, string. The license of the file. Must be "CC0 1.0" or
+  "Public Domain".
 - type: "fcstd"
 - objects: mandatory, list of base-object-element_.
 
@@ -526,3 +532,30 @@ Document. It has the following keys:
   the names of the properties and the values are the names of the parameter as
   specified in a parameter-element_. Defaults to {objectname : {"Label" :
   "name"}}
+
+
+.. _supported-licenses:
+
+###########################
+Supported Licenses in BOLTS
+###########################
+
+The license of a file contained in BOLTS must be one of the following:
+
+* `CC0 1.0 <http://creativecommons.org/publicdomain/zero/1.0/>`_
+* `Public Domain <http://jreinhardt.github.io/BOLTS/public_domain.html>`_
+* `MIT <http://opensource.org/licenses/MIT>`_
+* `BSD 3-clause <http://opensource.org/licenses/BSD-3-Clause>`_
+* `Apache 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_
+* `LGPL 2.1 <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>`_
+* `LGPL 2.1+ <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>`_
+* `LGPL 3.0 <http://opensource.org/licenses/LGPL-3.0>`_
+* `LGPL 3.0+ <http://opensource.org/licenses/LGPL-3.0>`_
+* `GPL 2.0 <http://www.gnu.org/licenses/old-licenses/gpl-2.0>`_
+* `GPL 2.0+ <http://www.gnu.org/licenses/old-licenses/gpl-2.0>`_
+* `GPL 3.0 <http://www.gnu.org/licenses/gpl-3.0>`_
+* `GPL 3.0+ <http://www.gnu.org/licenses/gpl-3.0>`_
+
+where a + indicates a clause that allows a later version of the license to be
+used.
+
