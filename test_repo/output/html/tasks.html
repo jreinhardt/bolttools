@@ -1,0 +1,59 @@
+---
+  layout: base
+  title: Possibilities for contribution
+---
+
+<div class="page-title-bar">
+  <div class="inner-content">
+    <h2>{{ page.title }}</h2>
+  </div>
+</div>
+
+<div id="content">
+  <div class="inner-content">
+    <h1>Bases</h1>
+    <p> For some classes a backend specific geometry is missing for one or more CAD packages.
+    <table class="table">
+      <tr><th>Class id</th> <th>Standards</th> <th>FreeCAD</th> <th>OpenSCAD</th><tr>
+<tr class='partial'><td>hexscrew2</td> <td>['ISO4017', 'DINENISO4017', 'DINEN24017']</td> <td>Yes (function)</td> <td>Deactivated</td></tr>
+<tr class='partial'><td>lack1</td> <td>None</td> <td>Deactivated</td> <td>Deactivated</td></tr>
+<tr class='partial'><td>tuberect</td> <td>None</td> <td>Deactivated</td> <td>Deactivated</td></tr>
+<tr class='partial'><td>cube1</td> <td>None</td> <td>Deactivated</td> <td>Yes (stl)</td></tr>
+    </table>
+  </div>
+
+  <div class="inner-content">
+    <h1>Drawings</h1>
+    <p> For some classes a drawing is missing that gives a visual overview over the part and clarifies the meaning of the parameters.
+    <table class="table">
+      <tr><th>Class id</th> <th>Standards</th> <th>Collection id</th><tr>
+<tr><td>hexscrew2</td> <td>['ISO4017', 'DINENISO4017', 'DINEN24017']</td> <td>hex</td></tr>
+<tr><td>hexbolt1</td> <td>['DIN931']</td> <td>hex</td></tr>
+<tr><td>hexbolt2</td> <td>['ISO4014', 'DINENISO4014', 'DINEN24014']</td> <td>hex</td></tr>
+<tr><td>hexscrew1</td> <td>['DIN933']</td> <td>multitable</td></tr>
+<tr><td>lack1</td> <td>None</td> <td>fcstd1</td></tr>
+<tr><td>tuberect</td> <td>None</td> <td>fcstd2</td></tr>
+<tr><td>cube1</td> <td>None</td> <td>stl</td></tr>
+    </table>
+    <p> For other classes no svg version of the drawing is available.
+    <table class="table">
+      <tr><th>Drawing name</th> <th>affected classes and collections</th><tr>
+<tr><td>drawings/bearings/singlerowradialbearing.svg</td> <td>[('singlerowradialbearing', 'baseparams')]</td></tr>
+    </table>
+  </div>
+
+  <div class="inner-content">
+    <h1>Unsupported licenses</h1>
+    <p> For some classes a unsupported license name and/or url was found. Often this is the result of typos. Check with the list in the specifications to idnetify these cases. If the license is not on the list, try contact all the copyright holder of the file and ask them to relicense this file under one of the supported licenses, or remove the file.
+    <table class="table">
+      <tr><th>Type</th> <th>Id/Filename</th> <th>License name</th> <th>License url</th> <th>Authors</th><tr>
+<tr><td>Collection</td> <td>hex</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:Johannes Reinhardt">jreinhardt@ist-dein-freund.de</a></td></tr>
+<tr><td>Collection</td> <td>multitable</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:Johannes Reinhardt">jreinhardt@ist-dein-freund.de</a></td></tr>
+<tr><td>Collection</td> <td>fcstd1</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:Johannes Reinhardt">jreinhardt@ist-dein-freund.de</a></td></tr>
+<tr><td>Collection</td> <td>fcstd2</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:Johannes Reinhardt">jreinhardt@ist-dein-freund.de</a></td></tr>
+<tr><td>FreeCAD base</td> <td>test_repo/freecad/hex/hex.py</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:Johannes Reinhardt">jreinhardt@ist-dein-freund.de</a></td></tr>
+<tr><td>FreeCAD base</td> <td>test_repo/freecad/hex/hex.py</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:Johannes Reinhardt">jreinhardt@ist-dein-freund.de</a></td></tr>
+<tr><td>OpenSCAD base</td> <td>hex.scad</td> <td>CC-BY-SA</td> <td>http://creativecommons.org/licenses/by-sa/3.0/</td> <td><a href="mailto:John Doe">John@doe.org</a></td></tr>
+    </table>
+  </div>
+</div>

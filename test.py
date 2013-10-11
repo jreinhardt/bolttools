@@ -78,9 +78,9 @@ class TestCollectionLoad(unittest.TestCase):
 		coll = blt_parser.BOLTSCollection("test_collections/minimal_class.blt")
 		self.assertEqual(coll.author_names,["Johannes Reinhardt"])
 		self.assertEqual(coll.author_mails,["jreinhardt@ist-dein-freund.de"])
-		self.assertEqual(coll.license_name,"CC-BY-SA")
+		self.assertEqual(coll.license_name,"LGPL 2.1+")
 		self.assertEqual(coll.license_url,
-			"http://creativecommons.org/licenses/by-sa/3.0/")
+			"http://www.gnu.org/licenses/old-licenses/lgpl-2.1")
 
 		cl = coll.classes[0]
 		self.assertEqual(cl.naming.template,"Partname")
@@ -122,51 +122,21 @@ class TestCollectionLoad(unittest.TestCase):
 		#negative value for parameter of type number
 		blt_parser.BOLTSCollection("test_collections/table_error2.blt")
 
-class TestOpenSCADGeneration(unittest.TestCase):
-	def test_data_init(self):
-		repo = blt_parser.BOLTSRepository("test_repos/small")
-		self.assertEqual(len(repo.openscad.getbase),4)
+class TestRepository(unittest.TestCase):
+	def test_load(self):
+		repo = blt_parser.BOLTSRepository("test_repo")
+
+	def test_openscad(self):
+		repo = blt_parser.BOLTSRepository("test_repo")
 		openscad.OpenSCADExporter().write_output(repo)
 
-	def test_multi_table(self):
-		repo = blt_parser.BOLTSRepository("test_repos/multi_table")
-		self.assertEqual(len(repo.openscad.getbase),4)
-		openscad.OpenSCADExporter().write_output(repo)
-
-	def test_stl(self):
-		repo = blt_parser.BOLTSRepository("test_repos/stl")
-		self.assertEqual(len(repo.openscad.getbase),1)
-		openscad.OpenSCADExporter().write_output(repo)
-
-	def test_base_params(self):
-		repo = blt_parser.BOLTSRepository("test_repos/base_params")
-		openscad.OpenSCADExporter().write_output(repo)
-
-class TestFreeCADGeneration(unittest.TestCase):
-	def test_data_init(self):
-		freecad.FreeCADData("test_repos/small")
-
-	def test_fcstd(self):
-		repo = blt_parser.BOLTSRepository("test_repos/fcstd")
-		self.assertEqual(len(repo.freecad.getbase),2)
+	def test_freecad(self):
+		repo = blt_parser.BOLTSRepository("test_repo")
 		freecad.FreeCADExporter().write_output(repo)
 
-	def test_base_params(self):
-		repo = blt_parser.BOLTSRepository("test_repos/base_params")
-		freecad.FreeCADExporter().write_output(repo)
-
-class TestHTMLGeneration(unittest.TestCase):
-	def test_data_init(self):
-		html.HTMLData("test_repos/small")
-	def test_export(self):
-		#small
-		repo = blt_parser.BOLTSRepository("test_repos/small")
+	def test_html(self):
+		repo = blt_parser.BOLTSRepository("test_repo")
 		html.HTMLExporter().write_output(repo)
-		#stl
-		repo = blt_parser.BOLTSRepository("test_repos/stl")
-		html.HTMLExporter().write_output(repo)
-
-
 
 if __name__ == '__main__':
 	unittest.main()
