@@ -21,6 +21,7 @@ from os.path import join, exists, basename
 from shutil import copy
 # pylint: disable=W0622
 from codecs import open
+import license
 
 from errors import *
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
@@ -144,7 +145,7 @@ class OpenSCADData(BackendData):
 class OpenSCADExporter(BackendExporter):
 	def __init__(self):
 		BackendExporter.__init__(self)
-	def write_output(self,repo):
+	def write_output(self,repo,target_license):
 		if repo.openscad is None:
 			raise MalformedRepositoryError(
 				"Can not export, OpenSCAD Backend is not active")
@@ -161,6 +162,8 @@ class OpenSCADExporter(BackendExporter):
 		makedirs(join(out_path,"tables"))
 
 		#copy common files
+		if not license.is_combinable_with("LGPL 2.1+",target_license):
+			raise IncompatibleLicenseEroor("OpenSCAD common files are licensed under LGPL 2.1+, which is not compatible with %s" % taget_license)
 		makedirs(join(out_path,"common"))
 		for filename in listdir(join(oscad.backend_root,"common")):
 			copy(join(oscad.backend_root,"common",filename),
@@ -173,7 +176,10 @@ class OpenSCADExporter(BackendExporter):
 		copied = []
 		makedirs(join(out_path,"base"))
 		for id in oscad.getbase:
-			for path in oscad.getbase[id].get_copy_files():
+			base = oscad.getbase[id]
+			if not license.is_combinable_with(base.license_name,target_license):
+				continue
+			for path in base.get_copy_files():
 				if path in copied:
 					continue
 				copy(join(oscad.backend_root,path),join(out_path,"base",basename(path)))
@@ -182,7 +188,10 @@ class OpenSCADExporter(BackendExporter):
 		#include files
 		included = []
 		for id in oscad.getbase:
-			for path in oscad.getbase[id].get_include_files():
+			base = oscad.getbase[id]
+			if not license.is_combinable_with(base.license_name,target_license):
+				continue
+			for path in base.get_include_files():
 				if path in included:
 					continue
 				bolts_fid.write("include <base/%s>\n" % path)
@@ -192,8 +201,13 @@ class OpenSCADExporter(BackendExporter):
 
 		#write tables
 		for collection in repo.collections:
+			if not license.is_combinable_with(collection.license_name,target_license):
+				continue
 			for cl in collection.classes:
 				if not cl.id in repo.openscad.getbase:
+					continue
+				base = oscad.getbase[cl.id]
+				if not license.is_combinable_with(base.license_name,target_license):
 					continue
 				table_path = join("tables","%s_table.scad" % cl.openscadname)
 				table_filename = join(out_path,table_path)
@@ -209,8 +223,13 @@ class OpenSCADExporter(BackendExporter):
 
 		#write stubs
 		for collection in repo.collections:
+			if not license.is_combinable_with(collection.license_name,target_license):
+				continue
 			for cl in collection.classes:
 				if not cl.id in repo.openscad.getbase:
+					continue
+				base = oscad.getbase[cl.id]
+				if not license.is_combinable_with(base.license_name,target_license):
 					continue
 				self.write_stub(repo,bolts_fid,cl)
 				for std in standard_fids:

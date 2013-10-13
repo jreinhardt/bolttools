@@ -19,17 +19,17 @@
 
 #List of licenses BOLTS can handle
 LICENSES = {
+	"unclear" : "http://jreinhardt.github.io/BOLTS/unclear_license.html",
 	"CC0 1.0" : "http://creativecommons.org/publicdomain/zero/1.0/",
 	"Public Domain" : "http://jreinhardt.github.io/BOLTS/public_domain.html",
 	"MIT" : "http://opensource.org/licenses/MIT", #see https://fedoraproject.org/wiki/Licensing:MIT?rd=Licensing/MIT
 	"BSD 3-clause" : "http://opensource.org/licenses/BSD-3-Clause",
 	"Apache 2.0" : "http://www.apache.org/licenses/LICENSE-2.0",
-	"LGPL 2.1" : "http://www.gnu.org/licenses/old-licenses/lgpl-2.1",
-	"LGPL 2.1+" : "http://www.gnu.org/licenses/old-licenses/lgpl-2.1",
-	"LGPL 3.0" : "http://opensource.org/licenses/LGPL-3.0",
-	"LGPL 3.0+" : "http://opensource.org/licenses/LGPL-3.0",
-	"GPL 2.0" : "http://www.gnu.org/licenses/old-licenses/gpl-2.0",
-	"GPL 2.0+" : "http://www.gnu.org/licenses/old-licenses/gpl-2.0",
+	"LGPL 2.1" : "http://www.gnu.org/licenses/lgpl-2.1",
+	"LGPL 2.1+" : "http://www.gnu.org/licenses/lgpl-2.1",
+	"LGPL 3.0" : "http://opensource.org/licenses/lgpl-3.0",
+	"LGPL 3.0+" : "http://opensource.org/licenses/lgpl-3.0",
+	"GPL 2.0+" : "http://www.gnu.org/licenses/gpl-2.0",
 	"GPL 3.0" : "http://www.gnu.org/licenses/gpl-3.0",
 	"GPL 3.0+" : "http://www.gnu.org/licenses/gpl-3.0",
 }
@@ -53,7 +53,6 @@ LICENSE_LINKS = [
 	("BSD 3-clause","LGPL 3.0+"),
 	("Apache 2.0","LGPL 3.0+"),
 	("Apache 2.0","LGPL 3.0"),
-	("LGPL 2.1","GPL 2.0"),
 	("LGPL 2.1","GPL 2.0+"),
 	("LGPL 2.1+","LGPL 2.1"),
 	("LGPL 2.1+","LGPL 3.0"),
@@ -63,6 +62,8 @@ LICENSE_LINKS = [
 	("LGPL 3.0","GPL 3.0+"),
 	("LGPL 3.0+","GPL 3.0"),
 	("LGPL 3.0+","GPL 3.0+"),
+	("GPL 2.0+","GPL 2.0"),
+	("GPL 2.0+","GPL 3.0"),
 ]
 
 LICENSE_GRAPH = {k : [] for k in LICENSES}

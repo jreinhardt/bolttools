@@ -15,13 +15,14 @@
 
 import yaml
 import importlib
-from os import listdir
+from os import listdir, makedirs
 from os.path import join, exists, basename, splitext
 from shutil import copy, copytree
 # pylint: disable=W0622
 from codecs import open
 
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
+import license
 from errors import *
 
 SPEC = {
@@ -167,7 +168,7 @@ class FreeCADData(BackendData):
 				elif basefile["type"] == "fcstd":
 					basepath = join(self.backend_root,coll,basefile["filename"])
 					if not exists(basepath):
-						raise MalformedBaseError("Fcstd file %s does not exist" % basepath)
+						continue
 					for obj in basefile["objects"]:
 						try:
 							fcstd = BaseFcstd(obj,basefile,coll,self.backend_root)
@@ -181,7 +182,7 @@ class FreeCADData(BackendData):
 class FreeCADExporter(BackendExporter):
 	def __init__(self):
 		BackendExporter.__init__(self)
-	def write_output(self,repo):
+	def write_output(self,repo,target_license):
 		if repo.freecad is None:
 			raise MalformedRepositoryError(
 				"Can not export: FreeCAD Backend is not active")
@@ -200,9 +201,48 @@ class FreeCADExporter(BackendExporter):
 		start_macro.close()
 
 		#copy files
-		copytree(join(repo_path,"data"),join(bolts_path,"data"))
+		#bolttools
+		if not license.is_combinable_with("LGPL 2.1+",target_license):
+			raise IncompatibleLicenseEroor("bolttools licensed under LGPL 2.1+, which is not compatible with %s" % taget_license)
 		copytree(join(repo_path,"bolttools"),join(bolts_path,"bolttools"))
-		copytree(join(repo_path,"drawings"),join(bolts_path,"drawings"))
-		copytree(join(repo_path,"freecad"),join(bolts_path,"freecad"))
+
+		#freecad gui code
+		if not license.is_combinable_with("LGPL 2.1+",target_license):
+			raise IncompatibleLicenseEroor("OpenSCAD common files are licensed under LGPL 2.1+, which is not compatible with %s" % taget_license)
+		if not exists(join(bolts_path,"freecad")):
+			makedirs(join(bolts_path,"freecad"))
+		if not exists(join(bolts_path,"data")):
+			makedirs(join(bolts_path,"data"))
+		open(join(bolts_path,"freecad","__init__.py"),"w").close()
+
+		copytree(join(repo_path,"freecad","gui"),join(bolts_path,"freecad","gui"))
+
 		copytree(join(repo_path,"icons"),join(bolts_path,"icons"))
 		copy(join(repo_path,"__init__.py"),bolts_path)
+
+		for coll in repo.collections:
+			if not license.is_combinable_with(coll.license_name,target_license):
+				continue
+			copy(join(repo_path,"data","%s.blt" % coll.id),
+				join(bolts_path,"data","%s.blt" % coll.id))
+
+			if exists(join(repo_path,"drawings",coll.id)):
+				copytree(join(repo_path,"drawings",coll.id),
+					join(bolts_path,"drawings",coll.id))
+
+			if not exists(join(bolts_path,"freecad",coll.id)):
+				makedirs(join(bolts_path,"freecad",coll.id))
+
+			if not exists(join(repo_path,"freecad",coll.id,"%s.base" % coll.id)):
+				continue
+
+			copy(join(repo_path,"freecad",coll.id,"%s.base" % coll.id),
+				join(bolts_path,"freecad",coll.id,"%s.base" % coll.id))
+			for cl in coll.classes:
+				base = freecad.getbase[cl.id]
+				if not base.license_name in license.LICENSES:
+					continue
+				if not license.is_combinable_with(base.license_name,target_license):
+					continue
+				copy(join(repo_path,"freecad",coll.id,basename(base.filename)),
+					join(bolts_path,"freecad",coll.id,basename(base.filename)))
