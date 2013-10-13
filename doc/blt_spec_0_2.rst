@@ -551,7 +551,6 @@ The license of a file contained in BOLTS must be one of the following:
 * `LGPL 2.1+ <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>`_
 * `LGPL 3.0 <http://opensource.org/licenses/LGPL-3.0>`_
 * `LGPL 3.0+ <http://opensource.org/licenses/LGPL-3.0>`_
-* `GPL 2.0 <http://www.gnu.org/licenses/old-licenses/gpl-2.0>`_
 * `GPL 2.0+ <http://www.gnu.org/licenses/old-licenses/gpl-2.0>`_
 * `GPL 3.0 <http://www.gnu.org/licenses/gpl-3.0>`_
 * `GPL 3.0+ <http://www.gnu.org/licenses/gpl-3.0>`_
