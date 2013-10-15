@@ -200,25 +200,28 @@ class OpenSCADExporter(BackendExporter):
 				included.append(path)
 
 		#write tables
+		table_cache = []
 		for collection in repo.collections:
 			if not license.is_combinable_with(collection.license_name,target_license):
 				continue
 			for cl in collection.classes:
 				if not cl.id in repo.openscad.getbase:
 					continue
-				base = oscad.getbase[cl.id]
-				if not license.is_combinable_with(base.license_name,target_license):
-					continue
-				table_path = join("tables","%s_table.scad" % cl.openscadname)
-				table_filename = join(out_path,table_path)
-				fid = open(table_filename,"w","utf8")
-				self.write_table(fid,collection,cl)
-				fid.close()
+				if not cl.id in table_cache:
+					base = oscad.getbase[cl.id]
+					if not license.is_combinable_with(base.license_name,target_license):
+						continue
+					table_path = join("tables","%s_table.scad" % cl.id)
+					table_filename = join(out_path,table_path)
+					fid = open(table_filename,"w","utf8")
+					self.write_table(fid,collection,cl)
+					fid.close()
+					table_cache.append(cl.id)
 
-				bolts_fid.write("include <%s>\n" % table_path)
-				for std in standard_fids:
-					if cl in repo.standardized[std]:
-						standard_fids[std].write("include <%s>\n" % table_path)
+					bolts_fid.write("include <%s>\n" % table_path)
+					for std in standard_fids:
+						if cl in repo.standardized[std]:
+							standard_fids[std].write("include <%s>\n" % table_path)
 		bolts_fid.write("\n\n")
 
 		#write stubs
@@ -247,7 +250,7 @@ class OpenSCADExporter(BackendExporter):
 
 			data = table.data
 
-			fid.write("function %s_table_%d(key) = \n" % (cl.openscadname,i))
+			fid.write("function %s_table_%d(key) = \n" % (cl.id,i))
 			fid.write("//%s\n" % ", ".join(table.columns))
 			for k,values in data.iteritems():
 				data = ["None" if v is None else v for v in values]
@@ -289,7 +292,7 @@ it might be better to use its successor %s instead");\n""" %
 		#load table data
 		for table,i in zip(cl.parameters.tables,range(len(cl.parameters.tables))):
 			fid.write('\tmeasures_%d = %s_table_%d(%s);\n' %
-				(i,cl.openscadname,i,table.index))
+				(i,cl.id,i,table.index))
 			fid.write('\tif(measures_%d == "Error"){\n' % i)
 			fid.write('\t\techo("TableLookUpError in %s, table %d");\n\t}\n' %
 				(cl.name,i))
