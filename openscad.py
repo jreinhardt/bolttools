@@ -32,15 +32,17 @@ SPEC = {
 	"module" : (["name", "arguments","classids"],["parameters"]),
 }
 
-
-def get_incantation(cl,params):
+def get_signature(cl,params):
 	arg_strings = []
 	for pname in params.free:
 		if params.types[pname] in ["String","Table Index"]:
 			arg_strings.append('%s="%s"' % (pname,params.defaults[pname]))
 		else:
 			arg_strings.append('%s=%s' % (pname,params.defaults[pname]))
-	return '%s(%s)' % (cl.openscadname, ', '.join(arg_strings))
+	return ', '.join(arg_strings)
+
+def get_incantation(cl,params):
+	return '%s(%s)' % (cl.openscadname, get_signature(cl,params))
 
 class OpenSCADBase(BaseBase):
 	def __init__(self,basefile,collname):
@@ -235,9 +237,11 @@ class OpenSCADExporter(BackendExporter):
 				if not license.is_combinable_with(base.license_name,target_license):
 					continue
 				self.write_stub(repo,bolts_fid,cl)
+				self.write_dim_accessor(repo,bolts_fid,cl)
 				for std in standard_fids:
 					if cl in repo.standardized[std]:
 						self.write_stub(repo,standard_fids[std],cl)
+						self.write_dim_accessor(repo,standard_fids[std],cl)
 		bolts_fid.close()
 		for std in standard_fids:
 			standard_fids[std].close()
@@ -256,6 +260,25 @@ class OpenSCADExporter(BackendExporter):
 				data = ["None" if v is None else v for v in values]
 				fid.write('key == "%s" ? %s : \n' % (k,str(data).replace("'",'"')))
 			fid.write('"Error";\n\n')
+
+	def write_dim_accessor(self,repo,fid,cl):
+		units = {"Length (mm)" : "mm", "Length (in)" : "in"}
+		#collect textual parameter representations
+		args = {}
+		if not cl.standard is None:
+			args['standard'] = '"%s"' % cl.name
+		#class parameters
+		params = cl.parameters.union(repo.openscad.getbase[cl.id].parameters)
+		for pname in params.free:
+			args[pname] = pname
+		args.update(params.literal)
+		for table,i in zip(params.tables,range(len(params.tables))):
+			for pname,j in zip(table.columns,range(len(table.columns))):
+				unit = units[params.types[pname]]
+				args[pname] = 'convert_to_default_unit(%s_table_%d(%s)[%d],"%s")' % (cl.id,i,table.index,j,unit)
+		fid.write("function %s_dims(%s) = [\n\t" % (cl.openscadname, get_signature(cl,params)))
+		fid.write(",\n\t".join('["%s", %s]' % (pname,args[pname]) for pname in params.parameters))
+		fid.write("];\n\n")
 
 	def write_stub(self,repo,fid,cl):
 		units = {"Length (mm)" : "mm", "Length (in)" : "in"}
