@@ -274,8 +274,11 @@ class OpenSCADExporter(BackendExporter):
 		args.update(params.literal)
 		for table,i in zip(params.tables,range(len(params.tables))):
 			for pname,j in zip(table.columns,range(len(table.columns))):
-				unit = units[params.types[pname]]
-				args[pname] = 'convert_to_default_unit(%s_table_%d(%s)[%d],"%s")' % (cl.id,i,table.index,j,unit)
+				if params.types[pname] in units:
+					unit = units[params.types[pname]]
+					args[pname] = 'convert_to_default_unit(%s_table_%d(%s)[%d],"%s")' % (cl.id,i,table.index,j,unit)
+				else:
+					args[pname] = '%s_table_%d(%s)[%d]' % (cl.id,i,table.index,j)
 		fid.write("function %s_dims(%s) = [\n\t" % (cl.openscadname, get_signature(cl,params)))
 		fid.write(",\n\t".join('["%s", %s]' % (pname,args[pname]) for pname in params.parameters))
 		fid.write("];\n\n")
@@ -293,8 +296,11 @@ class OpenSCADExporter(BackendExporter):
 		args.update(params.literal)
 		for table,i in zip(params.tables,range(len(params.tables))):
 			for pname,j in zip(table.columns,range(len(table.columns))):
-				unit = units[params.types[pname]]
-				args[pname] = 'convert_to_default_unit(measures_%d[%d],"%s")' % (i,j,unit)
+				if params.types[pname] in units:
+					unit = units[params.types[pname]]
+					args[pname] = 'convert_to_default_unit(measures_%d[%d],"%s")' % (i,j,unit)
+				else:
+					args[pname] = 'measures_%d[%d]' % (i,j)
 
 		#incantation
 		fid.write("module %s{\n" % get_incantation(cl,params))
