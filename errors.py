@@ -90,6 +90,6 @@ class NonUniqueClassIdError(Exception):
 
 class IncompatibleLicenseError(Exception):
 	def __init__(self,msg):
-		self.msh = msg
+		self.msg = msg
 	def __str__(self):
 		return self.msg

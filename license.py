@@ -62,7 +62,6 @@ LICENSE_LINKS = [
 	("LGPL 3.0","GPL 3.0+"),
 	("LGPL 3.0+","GPL 3.0"),
 	("LGPL 3.0+","GPL 3.0+"),
-	("GPL 2.0+","GPL 2.0"),
 	("GPL 2.0+","GPL 3.0"),
 ]
 

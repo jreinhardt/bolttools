@@ -165,7 +165,7 @@ class OpenSCADExporter(BackendExporter):
 
 		#copy common files
 		if not license.is_combinable_with("LGPL 2.1+",target_license):
-			raise IncompatibleLicenseEroor("OpenSCAD common files are licensed under LGPL 2.1+, which is not compatible with %s" % taget_license)
+			raise IncompatibleLicenseError("OpenSCAD common files are licensed under LGPL 2.1+, which is not compatible with %s" % target_license)
 		makedirs(join(out_path,"common"))
 		for filename in listdir(join(oscad.backend_root,"common")):
 			copy(join(oscad.backend_root,"common",filename),
