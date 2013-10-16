@@ -356,6 +356,7 @@ However, there are some keys that are present in every base file element:
 - license: mandatory, string. The license of the file. Must be one of the
   supported-licenses_.
 - type: mandatory, string. A string describing the type of the file.
+- source: optional, string. A string describing the origin of the file.
 
 Backends support different base-file-types, for a list see list-of-base-file-types_.
 
@@ -547,11 +548,11 @@ The license of a file contained in BOLTS must be one of the following:
 * `MIT <http://opensource.org/licenses/MIT>`_
 * `BSD 3-clause <http://opensource.org/licenses/BSD-3-Clause>`_
 * `Apache 2.0 <http://www.apache.org/licenses/LICENSE-2.0>`_
-* `LGPL 2.1 <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>`_
-* `LGPL 2.1+ <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>`_
-* `LGPL 3.0 <http://opensource.org/licenses/LGPL-3.0>`_
-* `LGPL 3.0+ <http://opensource.org/licenses/LGPL-3.0>`_
-* `GPL 2.0+ <http://www.gnu.org/licenses/old-licenses/gpl-2.0>`_
+* `LGPL 2.1 <http://www.gnu.org/licenses/lgpl-2.1>`_
+* `LGPL 2.1+ <http://www.gnu.org/licenses/lgpl-2.1>`_
+* `LGPL 3.0 <http://www.gnu.org/licenses/lgpl-3.0>`_
+* `LGPL 3.0+ <http://www.gnu.org/licenses/lgpl-3.0>`_
+* `GPL 2.0+ <http://www.gnu.org/licenses/gpl-2.0>`_
 * `GPL 3.0 <http://www.gnu.org/licenses/gpl-3.0>`_
 * `GPL 3.0+ <http://www.gnu.org/licenses/gpl-3.0>`_
 

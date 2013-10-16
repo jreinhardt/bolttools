@@ -238,3 +238,7 @@ class BaseBase:
 		match = RE_ANGLED.match(self.license)
 		self.license_name = match.group(1).strip()
 		self.license_url = match.group(2).strip()
+
+		self.source = ""
+		if "source" in basefile:
+			self.source = basefile["source"]
