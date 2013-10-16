@@ -72,6 +72,8 @@ for a,b in LICENSE_LINKS:
 def is_combinable_with(a,b):
 	if a == b:
 		return True
+	if not a in LICENSES or not b in LICENSES:
+		return False
 	if b in LICENSE_GRAPH[a]:
 		return True
 	else:

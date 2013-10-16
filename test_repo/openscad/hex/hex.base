@@ -1,7 +1,7 @@
 ---
 -  filename: hex.scad
    author: John Doe <John@doe.org>
-   license: CC-BY-SA <http://creativecommons.org/licenses/by-sa/3.0/>
+   license: MIT <http://opensource.org/licenses/MIT>
    type: module
    modules:
       - name: hex2

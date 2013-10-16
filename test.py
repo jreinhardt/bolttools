@@ -20,38 +20,6 @@ import openscad, freecad, html
 import unittest
 from errors import *
 
-class TestRepositoryLoad(unittest.TestCase):
-
-	def test_nonexistant(self):
-		self.assertRaises(MalformedRepositoryError, lambda:
-			blt_parser.BOLTSRepository("test_repos/does_not_exist")
-		)
-
-	def test_empty(self):
-		self.assertRaises(MalformedRepositoryError, lambda:
-			blt_parser.BOLTSRepository("test_repos/empty")
-		)
-
-	def test_no_collections(self):
-		repo = blt_parser.BOLTSRepository("test_repos/no_collections")
-		self.assertEqual(repo.collections,[])
-
-	def test_slash(self):
-		repo = blt_parser.BOLTSRepository("test_repos/no_collections/")
-		self.assertEqual(repo.collections,[])
-
-	def test_no_drawings(self):
-		self.assertRaises(MalformedRepositoryError, lambda:
-				blt_parser.BOLTSRepository("test_repos/no_drawings/")
-		)
-
-	def test_small(self):
-		repo = blt_parser.BOLTSRepository("test_repos/small")
-		self.assertFalse(repo.openscad is None)
-		self.assertFalse(repo.freecad is None)
-		self.assertFalse(repo.html is None)
-
-
 class TestCollectionLoad(unittest.TestCase):
 
 	def test_empty(self):
@@ -128,11 +96,11 @@ class TestRepository(unittest.TestCase):
 
 	def test_openscad(self):
 		repo = blt_parser.BOLTSRepository("test_repo")
-		openscad.OpenSCADExporter().write_output(repo)
+		openscad.OpenSCADExporter().write_output(repo,"LGPL 2.1+")
 
 	def test_freecad(self):
 		repo = blt_parser.BOLTSRepository("test_repo")
-		freecad.FreeCADExporter().write_output(repo)
+		freecad.FreeCADExporter().write_output(repo,"LGPL 2.1+")
 
 	def test_html(self):
 		repo = blt_parser.BOLTSRepository("test_repo")
