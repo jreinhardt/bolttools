@@ -27,8 +27,8 @@ from errors import *
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
 
 SPEC = {
-	"file-module" : (["filename","author","license","type","modules"],[]),
-	"file-stl" : (["filename","author","license","type","classids"],[]),
+	"file-module" : (["filename","author","license","type","modules"],["source"]),
+	"file-stl" : (["filename","author","license","type","classids"],["source"]),
 	"module" : (["name", "arguments","classids"],["parameters"]),
 }
 

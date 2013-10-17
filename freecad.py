@@ -26,8 +26,8 @@ import license
 from errors import *
 
 SPEC = {
-	"file-function" : (["filename","author","license","type","functions"],[]),
-	"file-fcstd" : (["filename","author","license","type","objects"],[]),
+	"file-function" : (["filename","author","license","type","functions"],["source"]),
+	"file-fcstd" : (["filename","author","license","type","objects"],["source"]),
 	"function" : (["name","classids"],["parameters"]),
 	"object" : (["objectname","classids"],["proptoparam","parameters"]),
 }
