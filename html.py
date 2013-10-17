@@ -90,7 +90,6 @@ class HTMLExporter(BackendExporter):
 		fid.write(self.templates["index"].substitute(params))
 		fid.close()
 
-
 		#write contributors list
 		#collect contributors
 		contributors_names = []
@@ -137,115 +136,14 @@ class HTMLExporter(BackendExporter):
 		fid.write(self.templates["statistics"].substitute(params))
 		fid.close()
 
-		#write base overview
-		rows = []
-		status = []
-		classids = []
-		for coll in repo.collections:
-			for cl in coll.classes:
-				if cl.id in classids:
-					continue
-				classids.append(cl.id)
-				in_freecad = "Deactivated"
-				if not repo.freecad is None:
-					if cl.id in repo.freecad.getbase:
-						in_freecad = "Yes"
-						base = repo.freecad.getbase[cl.id]
-						if isinstance(base,freecad.BaseFcstd):
-							in_freecad = "Yes (Fcstd)"
-						elif isinstance(base,freecad.BaseFunction):
-							in_freecad = "Yes (function)"
-				in_openscad = "Deactivated"
-				if not repo.openscad is None:
-					if cl.id in repo.openscad.getbase:
-						in_openscad = "Yes"
-						base = repo.openscad.getbase[cl.id]
-						if isinstance(base,openscad.BaseModule):
-							in_openscad = "Yes (module)"
-						elif isinstance(base,openscad.BaseSTL):
-							in_openscad = "Yes (stl)"
-				if ((cl.id in repo.freecad.getbase) and
-					(cl.id in repo.openscad.getbase)):
-					continue
-#					status.append("complete")
-				elif ((not cl.id in repo.freecad.getbase) or 
-					(not cl.id in repo.openscad.getbase)):
-					status.append("partial")
-					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
-				else:
-					status.append("none")
-					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
-
-		header = ["Class id","Standards","FreeCAD","OpenSCAD"]
-		params["basetable"] = html_table(rows,header,status)
-
-		#find missing images
-		rows = []
-		classids = []
-		nosvg = {}
-		for coll in repo.collections:
-			for cl in coll.classes:
-				if cl.drawing is None:
-					if cl.id in classids:
-						continue
-					rows.append([cl.id, str(cl.standard), coll.id])
-					classids.append(cl.id)
-				else:
-					svg_path = join("drawings","%s.svg" % splitext(cl.drawing)[0])
-					if svg_path in nosvg:
-						if not (cl.id, coll.id) in nosvg[svg_path]:
-							nosvg[svg_path].append((cl.id, coll.id))
-					elif not exists(join(html.repo_root,svg_path)):
-						nosvg[svg_path] = [(cl.id, coll.id)]
-
-
-		header = ["Class id","Standards","Collection id"]
-		params["missingdrawings"] = html_table(rows,header)
-
-		header = ["Drawing name","affected classes and collections"]
-		rows_svg = [[k,v] for k,v in nosvg.iteritems()]
-		params["missingdrawingssvg"] = html_table(rows_svg,header)
-
-		#find unsupported licenses
-		rows = []
-		for coll in repo.collections:
-			if not check_license(coll.license_name,coll.license_url):
-				authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
-					for a,m in zip(coll.author_names,coll.author_mails)])
-				rows.append(["Collection", coll.id, coll.license_name, coll.license_url, authors])
-
-		bases = []
-		if not repo.freecad is None:
-			for base in repo.freecad.getbase.values():
-				if base in bases:
-					continue
-				if not check_license(base.license_name,base.license_url):
-					authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
-						for  a,m in zip(base.author_names,base.author_mails)])
-					rows.append(["FreeCAD base", base.filename, base.license_name, base.license_url, authors])
-					bases.append(base)
-
-		bases = []
-		if not repo.openscad is None:
-			for base in repo.openscad.getbase.values():
-				if base in bases:
-					continue
-				if not check_license(base.license_name,base.license_url):
-					authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
-						for  a,m in zip(base.author_names,base.author_mails)])
-					rows.append(["OpenSCAD base", base.filename, base.license_name, base.license_url, authors])
-					bases.append(base)
-
-		header = ["Type","Id/Filename","License name","License url", "Authors"]
-		params["unsupportedlicenses"] = html_table(rows,header)
-
-
-
+		#write tasklist
+		params["basetable"] = self._missing_base_table(repo)
+		params["missingdrawings"],params["missingdrawingssvg"] = self._missing_image_tables(repo)
+		params["unsupportedlicenses"] = self._unsupported_license_table
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
 		fid.close()
-
 
 	def _write_collection(self,repo,coll):
 		html = repo.html
@@ -409,4 +307,104 @@ class HTMLExporter(BackendExporter):
 		fid = open(join(html.out_root,"classes","%s.html" % cl.name),'w','utf8')
 		fid.write(self.templates["class"].substitute(params))
 		fid.close()
-#
+
+	def _missing_base_table(self,repo):
+		rows = []
+		status = []
+		classids = []
+		for coll in repo.collections:
+			for cl in coll.classes:
+				if cl.id in classids:
+					continue
+				classids.append(cl.id)
+				in_freecad = "Deactivated"
+				if not repo.freecad is None:
+					if cl.id in repo.freecad.getbase:
+						in_freecad = "Yes"
+						base = repo.freecad.getbase[cl.id]
+						if isinstance(base,freecad.BaseFcstd):
+							in_freecad = "Yes (Fcstd)"
+						elif isinstance(base,freecad.BaseFunction):
+							in_freecad = "Yes (function)"
+				in_openscad = "Deactivated"
+				if not repo.openscad is None:
+					if cl.id in repo.openscad.getbase:
+						in_openscad = "Yes"
+						base = repo.openscad.getbase[cl.id]
+						if isinstance(base,openscad.BaseModule):
+							in_openscad = "Yes (module)"
+						elif isinstance(base,openscad.BaseSTL):
+							in_openscad = "Yes (stl)"
+				if ((cl.id in repo.freecad.getbase) and
+					(cl.id in repo.openscad.getbase)):
+					continue
+#					status.append("complete")
+				elif ((not cl.id in repo.freecad.getbase) or 
+					(not cl.id in repo.openscad.getbase)):
+					status.append("partial")
+					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
+				else:
+					status.append("none")
+					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
+
+		header = ["Class id","Standards","FreeCAD","OpenSCAD"]
+		return html_table(rows,header,status)
+
+	def _missing_image_tables(self,repo):
+		rows = []
+		classids = []
+		nosvg = {}
+		for coll in repo.collections:
+			for cl in coll.classes:
+				if cl.drawing is None:
+					if cl.id in classids:
+						continue
+					rows.append([cl.id, str(cl.standard), coll.id])
+					classids.append(cl.id)
+				else:
+					svg_path = join("drawings","%s.svg" % splitext(cl.drawing)[0])
+					if svg_path in nosvg:
+						if not (cl.id, coll.id) in nosvg[svg_path]:
+							nosvg[svg_path].append((cl.id, coll.id))
+					elif not exists(join(repo.html.repo_root,svg_path)):
+						nosvg[svg_path] = [(cl.id, coll.id)]
+
+		return (html_table(rows,["Class id","Standards","Collection id"]),
+			html_table([[k,v] for k,v in nosvg.iteritems()],
+				["Drawing name","affected classes and collections"]))
+
+	def _unsupported_license_table(self,repo):
+		rows = []
+		for coll in repo.collections:
+			if not check_license(coll.license_name,coll.license_url):
+				authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
+					for a,m in zip(coll.author_names,coll.author_mails)])
+				rows.append(["Collection", coll.id, coll.license_name, coll.license_url, authors])
+
+		bases = []
+		if not repo.freecad is None:
+			for base in repo.freecad.getbase.values():
+				if base in bases:
+					continue
+				if not check_license(base.license_name,base.license_url):
+					authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
+						for  a,m in zip(base.author_names,base.author_mails)])
+					rows.append(["FreeCAD base", base.filename, base.license_name, base.license_url, authors])
+					bases.append(base)
+
+		bases = []
+		if not repo.openscad is None:
+			for base in repo.openscad.getbase.values():
+				if base in bases:
+					continue
+				if not check_license(base.license_name,base.license_url):
+					authors = ", ".join(['<a href="mailto:%s">%s</a>' % (a,m)
+						for  a,m in zip(base.author_names,base.author_mails)])
+					rows.append(["OpenSCAD base", base.filename, base.license_name, base.license_url, authors])
+					bases.append(base)
+
+		header = ["Type","Id/Filename","License name","License url", "Authors"]
+		return html_table(rows,header)
+
+
+
