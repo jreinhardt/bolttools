@@ -35,6 +35,16 @@ LICENSES = {
 }
 
 
+LICENSES_SHORT = {
+	"lgpl2.1" : "LGPL 2.1",
+	"lgpl2.1+" : "LGPL 2.1+",
+	"lgpl3" : "LGPL 3.0",
+	"lgpl3+" : "LGPL 3.0+",
+	"gpl3" : "GPL 3.0",
+	"gpl3+" : "GPL 3.0+"
+}
+
+
 #Combinable pairs of licenses. (A,B) indicates that software with license A can
 #be combined with software with license B and the combination has license B. See
 #http://www.dwheeler.com/essays/floss-license-slide.html for details
