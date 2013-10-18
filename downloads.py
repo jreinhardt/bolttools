@@ -18,85 +18,92 @@
 
 import string
 from os import listdir
-from os.path import join, exists, basename
-from shutil import make_archive
-from subprocess import call
-from datetime import datetime
+from os.path import join, exists, basename, splitext
 # pylint: disable=W0622
 from codecs import open
 
-from common import BackendData, BackendExporter
+from common import BackendData, BackendExporter, html_table
+from license import LICENSES_SHORT
 from errors import *
-
-def uncommited_changes_present():
-	return call(["git","diff","--exit-code","--quiet"]) == 1
 
 class DownloadsData(BackendData):
 	def __init__(self,path):
 		BackendData.__init__(self,"downloads",path)
 
-		#find most current release
-		self.current = {}
-		self.freecad_down = join(self.out_root,"downloads","freecad")
-		for filename in sorted(listdir(self.freecad_down)):
-			if filename.endswith(".tar.gz"):
-				self.current["freecaddevtar"] = filename
-			elif filename.endswith(".zip"):
-				self.current["freecaddevzip"] = filename
-
-		self.openscad_down = join(self.out_root,"downloads","openscad")
-		for filename in sorted(listdir(self.openscad_down)):
-			if filename.endswith(".tar.gz"):
-				self.current["openscaddevtar"] = filename
-			elif filename.endswith(".zip"):
-				self.current["openscaddevzip"] = filename
-
 class DownloadsExporter(BackendExporter):
 	def __init__(self):
 		BackendExporter.__init__(self)
+
 	def write_output(self,repo):
 		# pylint: disable=R0201
 		downloads = repo.downloads
 		out_path = downloads.out_root
 
-		#check that there are no uncommited changes
-		if uncommited_changes_present():
-			raise UncommitedChangesError()
+		backends = ["freecad","openscad"]
 
-		#construct filename from date and hash
-		date = datetime.now().strftime("%Y%m%d%H%M")
-		template = "BOLTS_%s_%s" % ("%s",date)
+		#find most current release
+		self.release = {}
+		self.development = {}
 
-		#create archives
-		root_dir = join(repo.path,"output","freecad")
-		if (not repo.freecad is None) and exists(root_dir):
-			base_name = join(out_path,"downloads","freecad",template % "FreeCAD")
-			downloads.current["freecaddevtar"] = \
-				basename(make_archive(base_name,"gztar",root_dir))
-			downloads.current["freecaddevzip"] = \
-				basename(make_archive(base_name,"zip",root_dir))
+		for backend in backends:
+			self.release[backend] = {}
+			self.development[backend] = {}
+			for filename in listdir(join(out_path,"downloads",backend)):
+				basename,ext = splitext(filename)
+				if ext == ".gz":
+					ext = ".tar.gz"
+					basename = splitext(basename)[0]
+				parts = basename.split("_")
+				version_string = parts[2]
 
-		root_dir = join(repo.path,"output","openscad")
-		if (not repo.openscad is None) and exists(root_dir):
-			base_name = join(out_path,"downloads","openscad",template % "OpenSCAD")
-			downloads.current["openscaddevtar"] = \
-				basename(make_archive(base_name,"gztar",root_dir))
-			downloads.current["openscaddevzip"] = \
-				basename(make_archive(base_name,"zip",root_dir))
+				#some old development snapshots have no license in filename
+				license = "none"
+				if len(parts) > 3:
+					license = parts[3]
+
+				kind = self.development[backend]
+				version = None
+				try:
+					version = int(version_string)
+				except ValueError:
+					version = float(version_string)
+					kind = self.release[backend]
+
+				if not license in kind:
+					kind[license] = {}
+				if not ext in kind[license]:
+					kind[license][ext] = (version, join(backend,filename))
+				elif version > kind[license][ext][0]:
+					kind[license][ext] = (version, join(backend,filename))
+
+		params = {}
+
+		for kind,kind_name in zip([self.release, self.development],
+			["release","development"]):
+			for backend in backends:
+				rows = []
+				for license in ["lgpl2.1+","gpl3"]:
+					if license in kind[backend]:
+						rows.append([LICENSES_SHORT[license],
+							'<a href="downloads/%s">.tar.gz</a>' % (kind[backend][license][".tar.gz"][1]),
+							'<a href="downloads/%s">.zip</a>' % (kind[backend][license][".zip"][1])])
+				if len(rows) == 0:
+					rows = [["No %s distribution available" % kind_name]]
+				params["%s%s" % (backend, kind_name)] = html_table(rows)
 
 		#generate html page
 		template_name = join(downloads.backend_root,"template","downloads.html")
 		template = string.Template(open(template_name).read())
 		fid = open(join(out_path,"downloads.html"),"w","utf8")
-		fid.write(template.substitute(downloads.current))
+		fid.write(template.substitute(params))
 		fid.close()
-
-#TODO:
-#		I do not like the fact that I am shipping unprocessed and unstyled html
-#		here, but I do not see a nice workflow for processing and styling, so I
-#		don't
-#		if not repo.html is None:
-#			base_name = join(out_path,downloads.template % "html")
-#			root_dir = join(repo.path,"output","html")
-#			print make_archive(base_name,"gztar",root_dir)
-#			print make_archive(base_name,"zip",root_dir)
+#
+##TODO:
+##		I do not like the fact that I am shipping unprocessed and unstyled html
+##		here, but I do not see a nice workflow for processing and styling, so I
+##		don't
+##		if not repo.html is None:
+##			base_name = join(out_path,downloads.template % "html")
+##			root_dir = join(repo.path,"output","html")
+##			print make_archive(base_name,"gztar",root_dir)
+##			print make_archive(base_name,"zip",root_dir)
