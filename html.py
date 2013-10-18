@@ -139,7 +139,7 @@ class HTMLExporter(BackendExporter):
 		#write tasklist
 		params["basetable"] = self._missing_base_table(repo)
 		params["missingdrawings"],params["missingdrawingssvg"] = self._missing_image_tables(repo)
-		params["unsupportedlicenses"] = self._unsupported_license_table
+		params["unsupportedlicenses"] = self._unsupported_license_table(repo)
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
