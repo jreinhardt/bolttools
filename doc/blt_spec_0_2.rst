@@ -127,6 +127,7 @@ data as input and has one or several files as output. The output is called the
 distribution.
 
 .. image:: processing.png
+   :width: 100%
 
 
 A example for a backend would be a process that uses the backend indepent data
