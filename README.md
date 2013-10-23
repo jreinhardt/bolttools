@@ -13,6 +13,7 @@ Dependencies
 ------------
 
 YAML: http://pyyaml.org/
+Graphviz: http://graphviz.org
 
 License
 -------

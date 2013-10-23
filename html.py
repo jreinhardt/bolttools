@@ -18,6 +18,7 @@
 import string
 from os import listdir, makedirs
 from os.path import join, basename, splitext, exists
+from subprocess import check_output
 from shutil import copytree
 # pylint: disable=W0622
 from codecs import open
@@ -57,6 +58,7 @@ class HTMLExporter(BackendExporter):
 		makedirs(join(html.out_root,"classes"))
 		makedirs(join(html.out_root,"collections"))
 		makedirs(join(html.out_root,"bodies"))
+		makedirs(join(html.out_root,"images"))
 
 		#copy drawings
 		copytree(join(repo.path,"drawings"),join(html.out_root,"drawings"))
@@ -145,6 +147,9 @@ class HTMLExporter(BackendExporter):
 		fid.write(self.templates["tasks"].substitute(params))
 		fid.close()
 
+		#write base graph
+		self._write_base_graph_dot(join(html.out_root,"images"),repo)
+
 	def _write_collection(self,repo,coll):
 		html = repo.html
 		params = {}
@@ -213,7 +218,7 @@ class HTMLExporter(BackendExporter):
 
 			prop_row(props,"Status",cl.status)
 			prop_row(props,"Standard body","<a href='../bodies/%s.html'>%s</a>" %
-				(cl.body,cl.body))
+				(cl.standard_body,cl.standard_body))
 			if not cl.replaces is None:
 				prop_row(props,"Replaces","<a href='%s.html'>%s</a>" %
 					(cl.replaces,cl.replaces))
@@ -406,5 +411,72 @@ class HTMLExporter(BackendExporter):
 		header = ["Type","Id/Filename","License name","License url", "Authors"]
 		return html_table(rows,header)
 
+	def _write_base_graph_dot(self,path,repo):
+
+		for coll in repo.collections:
+			fid = open(join(path,"%s.dot" % coll.id),'w','utf8')
+			fid.write("digraph G {")
+			fid.write("rankdir=LR;\n")
+			std_cluster = ["subgraph cluster_std {"]
+			std_cluster.append('label="Standards";')
+			cl_cluster = ["subgraph cluster_cl {"]
+			cl_cluster.append('label="Classes";')
+			fcd_cluster = ["subgraph cluster_fcd {"]
+			fcd_cluster.append('label="FreeCAD";')
+			ocd_cluster = ["subgraph cluster_ocd {"]
+			ocd_cluster.append('label="OpenSCAD";')
+			links = []
+
+			classes = []
+			for cl in coll.classes:
+				if not cl.id in classes:
+					cl_cluster.append('"%s";' % cl.id)
+
+					if cl.id in repo.freecad.getbase:
+						base = repo.freecad.getbase[cl.id]
+						filename = basename(base.filename)
+						if isinstance(base,freecad.BaseFunction):
+							fcd_cluster.append('"%s:%s";' % (filename,base.name))
+							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.name))
+						elif isinstance(base,freecad.BaseFcstd):
+							fcd_cluster.append('"%s:%s";' % (filename,base.objectname))
+							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.objectname))
+
+					if cl.id in repo.openscad.getbase:
+						base = repo.openscad.getbase[cl.id]
+						filename = basename(base.filename)
+						if isinstance(base,openscad.BaseModule):
+							ocd_cluster.append('"%s:%s";' % (filename,base.name))
+							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.name))
+						elif isinstance(base,openscad.BaseSTL):
+							ocd_cluster.append('"%s:%s";' % (filename,"STL"))
+							links.append('"%s" -> "%s:%s";' % (cl.id, filename,"STL"))
+
+					classes.append(cl.id)
+
+				if not cl.standard is None:
+					std_cluster.append('"%s";' % cl.name)
+					links.append('"%s" -> "%s";' % (cl.name, cl.id))
 
 
+			cl_cluster.append("}\n")
+			std_cluster.append("}\n")
+			fcd_cluster.append("}\n")
+			ocd_cluster.append("}\n")
+
+			fid.write("\n".join(cl_cluster))
+			fid.write("\n".join(std_cluster))
+			fid.write("\n".join(fcd_cluster))
+			fid.write("\n".join(ocd_cluster))
+			fid.write("\n".join(links))
+			fid.write("}\n")
+			fid.close()
+
+			#render dots to png
+			fid = open(join(path,"%s.svg" % coll.id),'w','utf8')
+			fid.write(check_output(["dot","-Tsvg",join(path,"%s.dot" % coll.id)]))
+			fid.close()
+
+			fid = open(join(path,"%s.png" % coll.id),'wb')
+			fid.write(check_output(["dot","-Tpng",join(path,"%s.dot" % coll.id)]))
+			fid.close()
