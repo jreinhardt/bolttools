@@ -78,7 +78,7 @@ class BOLTSRepository:
 				for body in self.standard_bodies:
 					if cl.name.startswith(body):
 						self.standardized[body].append(cl)
-						cl.body = body
+						cl.standard_body = body
 						break
 
 		#fill in obsolescence data
