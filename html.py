@@ -416,7 +416,7 @@ class HTMLExporter(BackendExporter):
 		for coll in repo.collections:
 			fid = open(join(path,"%s.dot" % coll.id),'w','utf8')
 			fid.write("digraph G {")
-			fid.write("rankdir=LR;\n")
+			fid.write("rankdir=LR; nodesep=0.5; ranksep=1.5;splines=polyline;\n")
 			std_cluster = ["subgraph cluster_std {"]
 			std_cluster.append('label="Standards";')
 			cl_cluster = ["subgraph cluster_cl {"]
@@ -427,35 +427,39 @@ class HTMLExporter(BackendExporter):
 			ocd_cluster.append('label="OpenSCAD";')
 			links = []
 
+			layout_classes = "[width=3, height=0.8, fixedsize=true]"
+			layout_base = "[width=4, height=0.8, fixedsize=true]"
+			layout_standard = "[width=3, height=0.8, fixedsize=true]"
+
 			classes = []
 			for cl in coll.classes:
 				if not cl.id in classes:
-					cl_cluster.append('"%s";' % cl.id)
+					cl_cluster.append('"%s" %s;' % (cl.id,layout_classes))
 
 					if cl.id in repo.freecad.getbase:
 						base = repo.freecad.getbase[cl.id]
 						filename = basename(base.filename)
 						if isinstance(base,freecad.BaseFunction):
-							fcd_cluster.append('"%s:%s";' % (filename,base.name))
+							fcd_cluster.append('"%s:%s" %s;' % (filename,base.name,layout_base))
 							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.name))
 						elif isinstance(base,freecad.BaseFcstd):
-							fcd_cluster.append('"%s:%s";' % (filename,base.objectname))
+							fcd_cluster.append('"%s:%s" %s;' % (filename,base.objectname,layout_base))
 							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.objectname))
 
 					if cl.id in repo.openscad.getbase:
 						base = repo.openscad.getbase[cl.id]
 						filename = basename(base.filename)
 						if isinstance(base,openscad.BaseModule):
-							ocd_cluster.append('"%s:%s";' % (filename,base.name))
+							ocd_cluster.append('"%s:%s" %s;' % (filename,base.name,layout_base))
 							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.name))
 						elif isinstance(base,openscad.BaseSTL):
-							ocd_cluster.append('"%s:%s";' % (filename,"STL"))
+							ocd_cluster.append('"%s:%s" %s;' % (filename,"STL",layout_base))
 							links.append('"%s" -> "%s:%s";' % (cl.id, filename,"STL"))
 
 					classes.append(cl.id)
 
 				if not cl.standard is None:
-					std_cluster.append('"%s";' % cl.name)
+					std_cluster.append('"%s" %s;' % (cl.name,layout_standard))
 					links.append('"%s" -> "%s";' % (cl.name, cl.id))
 
 
