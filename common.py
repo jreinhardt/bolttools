@@ -96,9 +96,9 @@ class BOLTSParameters:
 		
 		for pname,tname in self.types.iteritems():
 			if not pname in self.parameters:
-				raise ValueError("Unknown parameter in types: %s" % pname)
+				raise UnknownParameterError(pname)
 			if not tname in all_types:
-				raise ValueError("Unknown type in types: %s" % tname)
+				raise UnknownTypeError(tname)
 
 		#fill in defaults for types
 		for pname in self.parameters:
@@ -115,7 +115,7 @@ class BOLTSParameters:
 		if "defaults" in param:
 			for pname in param["defaults"]:
 				if pname not in self.free:
-					raise ValueError("Default value given for non-free parameter")
+					raise NonFreeDefaultError(pname)
 				self.defaults[pname] = param["defaults"][pname]
 
 	def _check_conformity(self,param):

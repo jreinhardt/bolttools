@@ -227,10 +227,14 @@ class BOLTSClass:
 		#gets updated later by the repo
 		self.replacedby = None
 
-		if "parameters" in cl:
-			self.parameters = BOLTSParameters(cl["parameters"])
-		else:
-			self.parameters = BOLTSParameters({})
+		try:
+			if "parameters" in cl:
+				self.parameters = BOLTSParameters(cl["parameters"])
+			else:
+				self.parameters = BOLTSParameters({})
+		except ParsingError as e:
+			e.set_class(self.id)
+			raise e
 
 		self.url = ""
 		if "url" in cl:

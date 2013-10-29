@@ -78,6 +78,21 @@ class MalformedBaseError(ParsingError):
 		ParsingError.__init__(self)
 		self.msg = msg
 
+class NonFreeDefaultError(ParsingError):
+	def __init__(self,pname):
+		ParsingError.__init__(self)
+		self.msg = "Default value given for non-free parameter %s" % pname
+
+class UnknownParameterError(ParsingError):
+	def __init__(self,pname):
+		ParsingError.__init__(self)
+		self.msg = "Unknown parameter in types: %s" % pname
+
+class UnknownTypeError(ParsingError):
+	def __init__(self,tname):
+		ParsingError.__init__(self)
+		self.msg = "Unknown type in types: %s" % tname
+
 class UncommitedChangesError(Exception):
 	def __str__(self):
 		return "There are uncommited changes in the git repo"
