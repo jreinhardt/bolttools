@@ -22,6 +22,7 @@ from shutil import copy
 # pylint: disable=W0622
 from codecs import open
 import license
+from datetime import datetime
 
 from errors import *
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
@@ -147,7 +148,7 @@ class OpenSCADData(BackendData):
 class OpenSCADExporter(BackendExporter):
 	def __init__(self):
 		BackendExporter.__init__(self)
-	def write_output(self,repo,target_license):
+	def write_output(self,repo,target_license,version="unstable"):
 		if repo.openscad is None:
 			raise MalformedRepositoryError(
 				"Can not export, OpenSCAD Backend is not active")
@@ -173,6 +174,21 @@ class OpenSCADExporter(BackendExporter):
 			bolts_fid.write("include <common/%s>\n" % filename)
 			for std in standard_fids:
 				standard_fids[std].write("include <common/%s>\n" % filename)
+
+		#create version file
+		version_fid = open(join(out_path,"common","version.scad"),"w","utf8")
+		if version == "unstable":
+			version_fid.write('function BOLTS_version() = "%s";\n' % version)
+		else:
+			version_fid.write('function BOLTS_version() = [%d, %d];\n' %
+				str(version).split('.'))
+		date = datetime.now()
+		version_fid.write('function BOLTS_date() = [%d,%d,%d];\n' %
+				(date.year, date.month, date.day))
+		version_fid.close()
+		bolts_fid.write("include <common/version.scad>\n")
+		for std in standard_fids:
+			standard_fids[std].write("include <common/version.scad>\n")
 
 		#copy base files
 		copied = []
