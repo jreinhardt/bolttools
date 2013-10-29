@@ -169,6 +169,8 @@ class OpenSCADExporter(BackendExporter):
 			raise IncompatibleLicenseError("OpenSCAD common files are licensed under LGPL 2.1+, which is not compatible with %s" % target_license)
 		makedirs(join(out_path,"common"))
 		for filename in listdir(join(oscad.backend_root,"common")):
+			if not filename.endswith(".scad"):
+				continue
 			copy(join(oscad.backend_root,"common",filename),
 				join(out_path,"common",filename))
 			bolts_fid.write("include <common/%s>\n" % filename)
