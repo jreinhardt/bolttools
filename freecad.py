@@ -239,6 +239,7 @@ class FreeCADExporter(BackendExporter):
 
 			copy(join(repo_path,"freecad",coll.id,"%s.base" % coll.id),
 				join(bolts_path,"freecad",coll.id,"%s.base" % coll.id))
+			open(join(bolts_path,"freecad",coll.id,"__init__.py"),"w").close()
 			for cl in coll.classes:
 				base = freecad.getbase[cl.id]
 				if not base.license_name in license.LICENSES:
