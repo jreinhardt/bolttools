@@ -226,9 +226,10 @@ class FreeCADExporter(BackendExporter):
 			copy(join(repo_path,"data","%s.blt" % coll.id),
 				join(bolts_path,"data","%s.blt" % coll.id))
 
-			if exists(join(repo_path,"drawings",coll.id)):
-				copytree(join(repo_path,"drawings",coll.id),
-					join(bolts_path,"drawings",coll.id))
+#			if exists(join(repo_path,"drawings",coll.id)):
+#				copytree(join(repo_path,"drawings",coll.id),
+#					join(bolts_path,"drawings",coll.id))
+			makedirs(join(bolts_path,"drawings",coll.id))
 
 			if not exists(join(bolts_path,"freecad",coll.id)):
 				makedirs(join(bolts_path,"freecad",coll.id))
