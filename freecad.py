@@ -15,7 +15,7 @@
 
 import yaml
 import importlib
-from os import listdir, makedirs
+from os import listdir, makedirs, remove
 from os.path import join, exists, basename, splitext
 from shutil import copy, copytree
 # pylint: disable=W0622
@@ -205,6 +205,9 @@ class FreeCADExporter(BackendExporter):
 		if not license.is_combinable_with("LGPL 2.1+",target_license):
 			raise IncompatibleLicenseEroor("bolttools licensed under LGPL 2.1+, which is not compatible with %s" % taget_license)
 		copytree(join(repo_path,"bolttools"),join(bolts_path,"bolttools"))
+		#remove the .git file, because it confuses git
+		remove(join(bolts_path,"bolttools",".git"))
+
 
 		#freecad gui code
 		if not license.is_combinable_with("LGPL 2.1+",target_license):
