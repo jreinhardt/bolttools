@@ -110,8 +110,8 @@ class BOLTSParameters:
 			table._normalize_and_check_types(self.types)
 
 		#default values for free parameters
-		self.defaults = {pname : self.type_defaults[self.types[pname]]
-			for pname in self.free}
+		self.defaults = dict((pname,self.type_defaults[self.types[pname]])
+			for pname in self.free)
 		if "defaults" in param:
 			for pname in param["defaults"]:
 				if pname not in self.free:
