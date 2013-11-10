@@ -182,11 +182,13 @@ class OpenSCADExporter(BackendExporter):
 		if version == "unstable":
 			version_fid.write('function BOLTS_version() = "%s";\n' % version)
 		else:
-			version_fid.write('function BOLTS_version() = [%d, %d];\n' %
-				str(version).split('.'))
+			major, minor = str(version).split('.')
+			version_fid.write('function BOLTS_version() = [%s, %s, %s];\n' %
+				 (major, minor, target_license))
 		date = datetime.now()
 		version_fid.write('function BOLTS_date() = [%d,%d,%d];\n' %
 				(date.year, date.month, date.day))
+		version_fid.write('function BOLTS_license() = "%s";\n' % target_license);
 		version_fid.close()
 		bolts_fid.write("include <common/version.scad>\n")
 		for std in standard_fids:
