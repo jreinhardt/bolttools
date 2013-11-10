@@ -20,6 +20,7 @@ from os.path import join, exists, basename, splitext
 from shutil import copy, copytree
 # pylint: disable=W0622
 from codecs import open
+from datetime import datetime
 
 from common import BackendData, BackendExporter, BaseBase, BOLTSParameters
 import license
@@ -182,7 +183,7 @@ class FreeCADData(BackendData):
 class FreeCADExporter(BackendExporter):
 	def __init__(self):
 		BackendExporter.__init__(self)
-	def write_output(self,repo,target_license):
+	def write_output(self,repo,target_license,version="unstable"):
 		if repo.freecad is None:
 			raise MalformedRepositoryError(
 				"Can not export: FreeCAD Backend is not active")
@@ -208,6 +209,12 @@ class FreeCADExporter(BackendExporter):
 		#remove the .git file, because it confuses git
 		remove(join(bolts_path,"bolttools",".git"))
 
+		#generate version file
+		date = datetime.now()
+		version_file = open(join(bolts_path,"VERSION"),"w")
+		version_file.write("%s\n%d-%d-%d\n%s\n" %
+			(version, date.year, date.month, date.day, target_license))
+		version_file.close()
 
 		#freecad gui code
 		if not license.is_combinable_with("LGPL 2.1+",target_license):
