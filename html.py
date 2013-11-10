@@ -18,7 +18,7 @@
 import string
 from os import listdir, makedirs
 from os.path import join, basename, splitext, exists
-from subprocess import check_output
+import subprocess
 from shutil import copytree
 # pylint: disable=W0622
 from codecs import open
@@ -478,9 +478,9 @@ class HTMLExporter(BackendExporter):
 
 			#render dots to png
 			fid = open(join(path,"%s.svg" % coll.id),'w','utf8')
-			fid.write(check_output(["dot","-Tsvg",join(path,"%s.dot" % coll.id)]))
+			fid.write(subprocess.check_output(["dot","-Tsvg",join(path,"%s.dot" % coll.id)]))
 			fid.close()
 
 			fid = open(join(path,"%s.png" % coll.id),'wb')
-			fid.write(check_output(["dot","-Tpng",join(path,"%s.dot" % coll.id)]))
+			fid.write(subprocess.check_output(["dot","-Tpng",join(path,"%s.dot" % coll.id)]))
 			fid.close()
