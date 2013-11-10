@@ -75,7 +75,7 @@ LICENSE_LINKS = [
 	("GPL 2.0+","GPL 3.0"),
 ]
 
-LICENSE_GRAPH = {k : [] for k in LICENSES}
+LICENSE_GRAPH = dict((k,[]) for k in LICENSES)
 for a,b in LICENSE_LINKS:
 	LICENSE_GRAPH[a].append(b)
 

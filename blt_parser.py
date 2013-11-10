@@ -69,7 +69,7 @@ class BOLTSRepository:
 					e.set_collection(filename)
 					raise e
 
-		self.standardized = {body:[] for body in self.standard_bodies}
+		self.standardized = dict((body,[]) for body in self.standard_bodies)
 
 		#find standard parts and their respective standard bodies
 		for coll in self.collections:
