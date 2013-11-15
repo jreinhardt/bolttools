@@ -195,7 +195,7 @@ class BOLTSNaming:
 		check_dict(name,SPEC["naming"])
 
 	def get_name(self,params):
-		return self.template % (params[s] for s in self.substitute)
+		return self.template % tuple(params[s] for s in self.substitute)
 
 
 class BackendData:
