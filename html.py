@@ -123,12 +123,14 @@ class HTMLExporter(BackendExporter):
 		params["classes"] = 0
 		params["collections"] = 0
 		params["standards"] = 0
+		params["commonconfigurations"] = 0
 		for coll in repo.collections:
 			params["collections"] += 1
 			for cl in coll.classes:
 				params["classes"] += 1
 				if not cl.standard is None:
 					params["standards"] += len(cl.standard)
+				params["commonconfigurations"] += len(cl.parameters.common)
 		params["bodies"] = len(repo.standard_bodies)
 		params["contributors"] = len(contributors_names)
 		for key in params:
@@ -139,9 +141,10 @@ class HTMLExporter(BackendExporter):
 		fid.close()
 
 		#write tasklist
-		params["basetable"] = self._missing_base_table(repo)
+		params["missingbasetable"] = self._missing_base_table(repo)
 		params["missingdrawings"],params["missingdrawingssvg"] = self._missing_image_tables(repo)
 		params["unsupportedlicenses"] = self._unsupported_license_table(repo)
+		params["missingcommonparameters"] = self._missing_common_parameter_table(repo)
 
 		fid = open(join(html.out_root,"tasks.html"),'w','utf8')
 		fid.write(self.templates["tasks"].substitute(params))
@@ -354,6 +357,21 @@ class HTMLExporter(BackendExporter):
 
 		header = ["Class id","Standards","FreeCAD","OpenSCAD"]
 		return html_table(rows,header,status)
+
+	def _missing_common_parameter_table(self,repo):
+		rows = []
+		status = []
+		classids = []
+		for coll in repo.collections:
+			for cl in coll.classes:
+				if cl.id in classids:
+					continue
+				classids.append(cl.id)
+				if len(cl.parameters.common) == 0:
+					rows.append([coll.name, cl.id, str(cl.standard)])
+
+		header = ["Class ID","Collection","Standards"]
+		return html_table(rows,header)
 
 	def _missing_image_tables(self,repo):
 		rows = []
