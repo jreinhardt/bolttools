@@ -27,7 +27,7 @@ from errors import *
 
 SPEC = {
 	"naming" : (["template"],["substitute"]),
-	"parameters" : ([],["literal","free","tables","types","defaults"]),
+	"parameters" : ([],["literal","free","tables","types","defaults","common"]),
 	"table" : (["index","columns","data"],[])
 }
 
@@ -117,6 +117,42 @@ class BOLTSParameters:
 				if pname not in self.free:
 					raise NonFreeDefaultError(pname)
 				self.defaults[pname] = param["defaults"][pname]
+
+		#common parameter combinations
+		discrete_types = ["Bool", "Table Index"]
+		self.common = []
+		if "common" in param:
+			for tup in param["common"]:
+				self._populate_common(tup,[],0)
+		else:
+			discrete = True
+			for pname in self.free:
+				if not self.types[pname] in discrete_types:
+					discrete = False
+					break
+			if discrete and len(self.free) > 0:
+				self._populate_common([":" for i in range(len(self.free))],[],0)
+
+	def _populate_common(self, tup, values, idx):
+		if idx == len(self.free):
+			self.common.append(values)
+		else:
+			if tup[idx] == ":":
+				if self.types[self.free[idx]] == "Bool":
+					for v in [True, False]:
+						self._populate_common(tup,values + [v], idx+1)
+				elif self.types[self.free[idx]] == "Table Index":
+					for table in self.tables:
+						if self.free[idx] == table.index:
+							for v in table.data:
+								self._populate_common(tup,values + [v], idx+1)
+							break
+				else:
+					print "That should not happen"
+			else:
+				for v in tup[idx]:
+					self._populate_common(tup,values + [v], idx+1)
+
 
 	def _check_conformity(self,param):
 		# pylint: disable=R0201
