@@ -36,6 +36,8 @@ class DownloadsExporter(BackendExporter):
 
 	def write_output(self,repo):
 		# pylint: disable=R0201
+		if repo.downloads is None:
+			raise BackendNotAvailableError("downloads")
 		downloads = repo.downloads
 		out_path = downloads.out_root
 

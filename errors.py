@@ -48,6 +48,14 @@ class ParsingError(Exception):
 			for k,v in self.trace_info.iteritems())
 		return "%s.  %s" % (self.msg, trace)
 
+class BackendError(Exception):
+	def __init__(self,backendname):
+		Exception.__init__(self)
+		self.backendname = backendname
+		self.msg = ""
+	def __str__(self):
+		return "Problem in backend %s:\n" + self.msg
+
 class VersionError(ParsingError):
 	def __init__(self,version):
 		ParsingError.__init__(self)
@@ -108,3 +116,8 @@ class IncompatibleLicenseError(Exception):
 		self.msg = msg
 	def __str__(self):
 		return self.msg
+
+class BackendNotAvailableError(BackendError):
+	def __init__(self,backendname):
+		BackendError.__init__(self,backendname)
+		self.msg = "The backend is not available in this repo"

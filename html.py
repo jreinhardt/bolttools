@@ -43,7 +43,7 @@ class HTMLExporter(BackendExporter):
 		self.templates = {}
 	def write_output(self,repo):
 		if repo.html is None:
-			raise MalformedRepositoryError("Can not export: HTML Backend is not active")
+			raise BackendNotAvailableError("html")
 		html = repo.html
 
 		#load templates
@@ -334,6 +334,8 @@ class HTMLExporter(BackendExporter):
 							in_freecad = "Yes (Fcstd)"
 						elif isinstance(base,freecad.BaseFunction):
 							in_freecad = "Yes (function)"
+					else:
+						in_freecad = "No"
 				in_openscad = "Deactivated"
 				if not repo.openscad is None:
 					if cl.id in repo.openscad.getbase:
@@ -343,12 +345,12 @@ class HTMLExporter(BackendExporter):
 							in_openscad = "Yes (module)"
 						elif isinstance(base,openscad.BaseSTL):
 							in_openscad = "Yes (stl)"
-				if ((cl.id in repo.freecad.getbase) and
-					(cl.id in repo.openscad.getbase)):
+					else:
+						in_openscad = "No"
+				if in_freecad.startswith("Yes") and in_openscad.startswith("Yes"):
 					continue
 #					status.append("complete")
-				elif ((not cl.id in repo.freecad.getbase) or 
-					(not cl.id in repo.openscad.getbase)):
+				elif (not in_freecad.startswith("Yes")) or (not in_openscad.startswith("Yes")):
 					status.append("partial")
 					rows.append([cl.id, str(cl.standard), in_freecad, in_openscad])
 				else:
@@ -454,7 +456,7 @@ class HTMLExporter(BackendExporter):
 				if not cl.id in classes:
 					cl_cluster.append('"%s" %s;' % (cl.id,layout_classes))
 
-					if cl.id in repo.freecad.getbase:
+					if (not repo.freecad is None) and cl.id in repo.freecad.getbase:
 						base = repo.freecad.getbase[cl.id]
 						filename = basename(base.filename)
 						if isinstance(base,freecad.BaseFunction):
@@ -464,7 +466,7 @@ class HTMLExporter(BackendExporter):
 							fcd_cluster.append('"%s:%s" %s;' % (filename,base.objectname,layout_base))
 							links.append('"%s" -> "%s:%s";' % (cl.id, filename,base.objectname))
 
-					if cl.id in repo.openscad.getbase:
+					if (not repo.openscad is None) and  cl.id in repo.openscad.getbase:
 						base = repo.openscad.getbase[cl.id]
 						filename = basename(base.filename)
 						if isinstance(base,openscad.BaseModule):
@@ -479,7 +481,6 @@ class HTMLExporter(BackendExporter):
 				if not cl.standard is None:
 					std_cluster.append('"%s" %s;' % (cl.name,layout_standard))
 					links.append('"%s" -> "%s";' % (cl.name, cl.id))
-
 
 			cl_cluster.append("}\n")
 			std_cluster.append("}\n")
