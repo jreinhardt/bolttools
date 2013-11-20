@@ -32,7 +32,7 @@ class STEPData(BackendData):
 class STEPExporter(BackendExporter):
 	def __init__(self):
 		BackendExporter.__init__(self)
-	def write_output(self,repo,version="unstable"):
+	def write_output(self,repo,version=None):
 		if repo.step is None:
 			raise BackendNotAvailableError("downloads")
 		if repo.freecad is None:
@@ -42,9 +42,12 @@ class STEPExporter(BackendExporter):
 
 		self.clear_output_dir(step)
 
+		path = None
 		for coll in repo.collections:
-			#TODO: output folder named after version to make keeping parallel versions easier
-			path = join(step.out_root,coll.id)
+			if version is None:
+				path = join(step.out_root,coll.id)
+			else:
+				path = join(step.out_root,"BOLTS_%s" % version,coll.id)
 			makedirs(path)
 			for cl in coll.classes:
 				if not cl.id in repo.freecad.getbase:

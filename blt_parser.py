@@ -125,6 +125,13 @@ class BOLTSRepository:
 		except ImportError:
 			pass
 
+		self.step = None
+		try:
+			import step
+			self.step = step.STEPData(path)
+		except ImportError:
+			pass
+
 
 class BOLTSCollection:
 	def __init__(self,bltname):
