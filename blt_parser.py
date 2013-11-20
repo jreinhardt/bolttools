@@ -22,7 +22,6 @@ from os.path import splitext, split, exists, join
 # pylint: disable=W0622
 from codecs import open
 
-import openscad,freecad, html, downloads
 from errors import *
 from common import BOLTSParameters, BOLTSNaming, RE_ANGLED
 
@@ -95,17 +94,36 @@ class BOLTSRepository:
 
 		#load backend data
 		self.openscad = None
-		if exists(join(path,"openscad")):
-			self.openscad = openscad.OpenSCADData(path)
+		try:
+			import openscad
+			if exists(join(path,"openscad")):
+				self.openscad = openscad.OpenSCADData(path)
+		except ImportError:
+			pass
+
 		self.freecad = None
-		if exists(join(path,"freecad")):
-			self.freecad = freecad.FreeCADData(path)
+		try:
+			import freecad
+			if exists(join(path,"freecad")):
+				self.freecad = freecad.FreeCADData(path)
+		except ImportError:
+			pass
+
 		self.html = None
-		if exists(join(path,"html")):
-			self.html = html.HTMLData(path)
+		try:
+			import html
+			if exists(join(path,"html")):
+				self.html = html.HTMLData(path)
+		except ImportError:
+			pass
+
 		self.downloads = None
-		if exists(join(path,"downloads")):
-			self.downloads = downloads.DownloadsData(path)
+		try:
+			import downloads
+			if exists(join(path,"downloads")):
+				self.downloads = downloads.DownloadsData(path)
+		except ImportError:
+			pass
 
 
 class BOLTSCollection:
