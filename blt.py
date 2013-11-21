@@ -15,7 +15,6 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-
 import yaml
 import os
 from os.path import splitext, split, exists, join
@@ -23,19 +22,9 @@ from os.path import splitext, split, exists, join
 from codecs import open
 
 from errors import *
-from common import BOLTSParameters, BOLTSNaming, RE_ANGLED
-
+from common import YamlParser, BOLTSParameters, BOLTSNaming, RE_ANGLED
 
 CURRENT_VERSION = 0.2
-
-#this is not super-precise, but allows to do some rough checks
-SPEC = {
-	"root" : (["collection","classes"],[]),
-	"collection" : (["author","license","blt-version"],["name","description"]),
-	"class" : (["naming","source","id"],
-		["drawing","description","standard","status","replaces","parameters",
-		"url","notes"]),
-}
 
 class BOLTSRepository:
 	#order is important
@@ -53,20 +42,35 @@ class BOLTSRepository:
 			e = MalformedRepositoryError("No data directory found")
 			e.set_repo_path(path)
 			raise e
-		if not exists(join(path,"drawings")):
-			e = MalformedRepositoryError("Drawings folder is missing")
-			e.set_repo_path(path)
-			raise e
 
 		#load collection data
 		for filename in os.listdir(join(path,"data")):
 			if splitext(filename)[1] == ".blt":
+
+				coll = list(yaml.load_all(open(filename,"r","utf8")))
+				if len(coll) == 0:
+					raise MalformedCollectionError(
+							"No YAML document found in file %s" % filename)
+				if len(coll) > 1:
+					raise MalformedCollectionError(
+							"More than one YAML document found in file %s" % filename)
+
 				try:
-					self.collections.append(BOLTSCollection(join(path,"data",filename)))
+					self.collections.append(BOLTSCollection(coll))
 				except ParsingError as e:
 					e.set_repo_path(path)
 					e.set_collection(filename)
 					raise e
+
+				if not self.collections[-1].id == splitext(filename)[0]:
+					raise MalformedCollectionError(
+						"Collection ID is not identical with file name: %s" % filename)
+
+				if self.collections[-1].id in ["common","gui","template"]:
+					raise MalformedCollectionError(
+							"Forbidden collection id: %s" % id)
+				return id
+
 
 		self.standardized = dict((body,[]) for body in self.standard_bodies)
 
@@ -92,53 +96,12 @@ class BOLTSRepository:
 						self.standardized[body][idx].replacedby = cl.name
 						break
 
-		#load backend data
-		self.openscad = None
-		try:
-			import openscad
-			if exists(join(path,"openscad")):
-				self.openscad = openscad.OpenSCADData(path)
-		except ImportError:
-			pass
-
-		self.freecad = None
-		try:
-			import freecad
-			if exists(join(path,"freecad")):
-				self.freecad = freecad.FreeCADData(path)
-		except ImportError:
-			pass
-
-		self.html = None
-		try:
-			import html
-			if exists(join(path,"html")):
-				self.html = html.HTMLData(path)
-		except ImportError:
-			pass
-
-		self.downloads = None
-		try:
-			import downloads
-			if exists(join(path,"downloads")):
-				self.downloads = downloads.DownloadsData(path)
-		except ImportError:
-			pass
-
-		self.step = None
-		try:
-			import step
-			self.step = step.STEPData(path)
-		except ImportError:
-			pass
-
-
-class BOLTSCollection:
-	def __init__(self,bltname):
-		self.id = self._find_collection_id(bltname)
-		coll = self._load_blt(bltname)
-
-		self._check_conformity(coll)
+class BOLTSCollection(YamlParser):
+	def __init__(self,coll):
+		YamlParser.__init__(self,coll,
+			["id","author","license","blt-version"],
+			["name","description"]
+		)
 
 		version = coll["collection"]["blt-version"]
 		if version != CURRENT_VERSION:
@@ -146,6 +109,9 @@ class BOLTSCollection:
 
 		#parse header
 		header = coll["collection"]
+
+		self.id = header["id"]
+
 		self.name = ""
 		if "name" in header:
 			self.name = header["name"]
@@ -171,6 +137,9 @@ class BOLTSCollection:
 		self.license_url = match.group(2).strip()
 
 		#parse classes
+		if not isinstance(coll["classes"],list):
+			raise MalformedCollectionError("No class in collection %s"% self.id)
+
 		self.classes = []
 		for cl in coll["classes"]:
 			names = cl["id"]
@@ -185,38 +154,16 @@ class BOLTSCollection:
 					e.set_class(name)
 					raise
 
-	def _load_blt(self,bltname):
-		coll = list(yaml.load_all(open(bltname,"r","utf8")))
-		if len(coll) == 0:
-			raise MalformedCollectionError(
-					"No YAML document found in file %s" % bltname)
-		if len(coll) > 1:
-			raise MalformedCollectionError(
-					"More than one YAML document found in file %s" % bltname)
-		return coll[0]
-
-	def _find_collection_id(self,bltname):
-		id = splitext(split(bltname)[1])[0]
-		if id in ["common","gui","template"]:
-			raise MalformedCollectionError(
-					"Forbidden collection id: %s" % id)
-		return id
-
-	def _check_conformity(self,coll):
-		# pylint: disable=R0201
-		check_dict(coll,SPEC["root"])
-		check_dict(coll["collection"],SPEC["collection"])
-		classes = coll["classes"]
-		if not isinstance(classes,list):
-			raise MalformedCollectionError("No class in collection %s"% self.id)
-
-
 #In contrast to the class-element specified in the blt, this structure has only
 #one name, a blt class element gets split into several BOLTSClasses during
 #parsing
-class BOLTSClass:
+class BOLTSClass(YamlParser):
 	def __init__(self,cl,name):
-		self._check_conformity(cl)
+		YamlParser.__init__(self,cl,
+			["naming","source","id"],
+			["drawing","description","standard","status","replaces","parameters",
+				"url","notes"]
+		)
 
 		self.id = cl["id"]
 
@@ -273,8 +220,3 @@ class BOLTSClass:
 
 		self.name = name
 		self.openscadname = name.replace("-","_").replace(" ","_").replace(".","_")
-
-	def _check_conformity(self,cl):
-		# pylint: disable=R0201
-		check_dict(cl,SPEC["class"])
-

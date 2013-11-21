@@ -158,24 +158,8 @@ The backend independent data is stored in `yaml <http://yaml.org/>`_ files
 with the extension .blt with exactly one YAML document and containing an
 associative array with the following keys:
 
-- collection: mandatory. The collection-header_
-- classes: mandatory. An list of class-element_ as values. 
-
-The filename without the .blt extension is called the collection id. Collection
-ids are one word identifiers, which must be unique within the repository. This
-class id is used as a way to refer to the class, when the standard field is not
-set.  They should contain only letters, numbers and underscores, and should be
-descriptive, as they may be visible to the user. Some names can not be
-collection ids: common, gui, template
-
-.. _collection-header:
-
-Collection header
------------------
-
-The collection header is an associative array that holds general informations
-regarding the collection_. It contains the following keys:
-
+- id: mandatory, string. The id of the collection. Must be identical to the
+  filename of the blt file without the extenstion.
 - name: optional, string. A name for the collection.
 - description: optional, string. A description of the contents of this
   collection.
@@ -187,6 +171,14 @@ regarding the collection_. It contains the following keys:
   the supported-licenses_.
 - blt-version: mandatory, number. The version of the blt format this collection
   follows.
+- classes: mandatory. An list of class-element_.
+
+The filename without the .blt extension is called the collection id. Collection
+ids are one word identifiers, which must be unique within the repository. This
+class id is used as a way to refer to the class, when the standard field is not
+set.  They should contain only letters, numbers and underscores, and should be
+descriptive, as they may be visible to the user. Some names can not be
+collection ids: common, gui, template
 
 .. _class-element:
 

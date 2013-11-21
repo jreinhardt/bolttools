@@ -15,21 +15,6 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-def check_dict(array,spec):
-	" Function to check a dictionary, as returned from YAML parsing, \
-	against a specified schema "
-	man = spec[0][:]
-	opt = spec[1][:]
-	for key in array.keys():
-		if key in man:
-			man.remove(key)
-		elif key in opt:
-			opt.remove(key)
-		else:
-			raise UnknownFieldError(key)
-	if len(man) > 0:
-		raise MissingFieldError(man)
-
 class ParsingError(Exception):
 	def __init__(self):
 		Exception.__init__(self)
@@ -62,14 +47,14 @@ class VersionError(ParsingError):
 		self.msg = "Old or unknown version: %g" % version
 
 class UnknownFieldError(ParsingError):
-	def __init__(self,fieldname):
+	def __init__(self,elementname,fieldname):
 		ParsingError.__init__(self)
-		self.msg = "Unknown Field: %s" % fieldname
+		self.msg = "Unknown field %s in %s" % (fieldname,elementname)
 
 class MissingFieldError(ParsingError):
-	def __init__(self,fieldname):
+	def __init__(self,elementname, fieldname):
 		ParsingError.__init__(self)
-		self.msg = "Missing Field: %s" % fieldname
+		self.msg = "Missing mandatory field %s in %s" % (fieldname,elementname)
 
 class MalformedRepositoryError(ParsingError):
 	def __init__(self,msg):

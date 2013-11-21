@@ -15,7 +15,7 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#common stuff
+#common elements and baseclasses
 
 import re
 from os import listdir,makedirs, remove
@@ -25,32 +25,22 @@ from copy import deepcopy
 
 from errors import *
 
-SPEC = {
-	"naming" : (["template"],["substitute"]),
-	"parameters" : ([],["literal","free","tables","types","defaults","common"]),
-	"table" : (["index","columns","data"],[])
-}
-
 RE_ANGLED = re.compile("([^<]*)<([^>]*)")
 
-#inspired by html.py but avoiding the dependency
-def html_table(table_data,header=None,row_classes=None):
-	"generates the content of a html table without the surrounding table tags"
-	res = []
-	if not header is None:
-		row = " ".join([u"<th>%s</th>" % unicode(head) for head in header])
-		res.append(u"<tr>%s<tr>" % row)
-	if row_classes is None:
-		row_classes = [None]*len(table_data)
-	for row_data,row_class in zip(table_data,row_classes):
-		row = " ".join([u"<td>%s</td>" % unicode(datum) for datum in row_data])
-		if row_class is None:
-			res.append(u"<tr>%s</tr>" % row)
-		else:
-			res.append(u"<tr class='%s'>%s</tr>" % (row_class,row))
-	return u"\n".join(res)
+class YamlParser:
+	def __init__(self, yaml_dict, element_name, mandatory_fields, optional_fields):
+		#check dict from YAML parsing for correct fields
+		for key in array.keys():
+			if key in mandatory_fields:
+				man.remove(key)
+			elif key in optional_fields:
+				opt.remove(key)
+			else:
+				raise UnknownFieldError(element_name,key)
+		if len(man) > 0:
+			raise MissingFieldError(element_name,man)
 
-class BOLTSParameters:
+class BOLTSParameters(YamlParser):
 	type_defaults = {
 		"Length (mm)" : 10,
 		"Length (in)" : 1,
@@ -60,7 +50,11 @@ class BOLTSParameters:
 		"String" : ''
 	}
 	def __init__(self,param):
-		self._check_conformity(param)
+		YamlParser.__init__(self,param,
+			[],
+			["literal","free","tables","types","defaults","common"]
+		)
+
 		self.literal = {}
 		if "literal" in param:
 			self.literal = param["literal"]
@@ -153,11 +147,6 @@ class BOLTSParameters:
 				for v in tup[idx]:
 					self._populate_common(tup,values + [v], idx+1)
 
-
-	def _check_conformity(self,param):
-		# pylint: disable=R0201
-		check_dict(param,SPEC["parameters"])
-
 	def collect(self,free):
 		res = {}
 		res.update(self.literal)
@@ -186,16 +175,16 @@ class BOLTSParameters:
 			res.defaults[pname] = tname
 		return res
 
-class BOLTSTable:
+class BOLTSTable(YamlParser):
 	def __init__(self,table):
-		self._check_conformity(table)
+		self.YamlParser.__init__(self,table,
+			["index","columns","data"],
+			[]
+		)
+
 		self.index = table["index"]
 		self.columns = table["columns"]
 		self.data = deepcopy(table["data"])
-
-	def _check_conformity(self,table):
-		# pylint: disable=R0201
-		check_dict(table,SPEC["table"])
 
 	def _normalize_and_check_types(self,types):
 		numbers = ["Length (mm)", "Length (in)", "Number"]
@@ -218,17 +207,17 @@ class BOLTSTable:
 					if tname == "Bool":
 						row[i] = bool(row[i])
 
-class BOLTSNaming:
+class BOLTSNaming(YamlParser):
 	def __init__(self,name):
-		self._check_conformity(name)
+		YamlParser.__init__(self,name,
+			["template"],
+			["substitute"]
+		)
+
 		self.template = name["template"]
 		self.substitute = []
 		if "substitute" in name:
 			self.substitute = name["substitute"]
-
-	def _check_conformity(self,name):
-		# pylint: disable=R0201
-		check_dict(name,SPEC["naming"])
 
 	def get_name(self,params):
 		return self.template % tuple(params[s] for s in self.substitute)
@@ -239,22 +228,6 @@ class BackendData:
 		self.repo_root = path
 		self.backend_root = join(path,name)
 		self.out_root = join(path,"output",name)
-
-
-class BackendExporter:
-	def __init__(self):
-		pass
-	def clear_output_dir(self,backend_data):
-		# pylint: disable=R0201
-		if not exists(backend_data.out_root):
-			makedirs(backend_data.out_root)
-		for path in listdir(backend_data.out_root):
-			full_path = join(backend_data.out_root,path)
-			if isfile(full_path):
-				remove(full_path)
-			else:
-				rmtree(full_path)
-
 
 class BaseBase:
 	def __init__(self,basefile,collname):
