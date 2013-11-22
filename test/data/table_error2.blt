@@ -15,9 +15,25 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ---
-collection:
-    author: Johannes Reinhardt <jreinhardt@ist-dein-freund.de>
-    license: LGPL 2.1+ <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>
-    blt-version: 0.2
+id: table_error2
+author: Johannes Reinhardt <jreinhardt@ist-dein-freund.de>
+license: LGPL 2.1+ <http://www.gnu.org/licenses/old-licenses/lgpl-2.1>
+blt-version: 0.3
 classes:
+  - id: partname
+    naming:
+      template: Partname
+    source: Invented for testpurposes
+    parameters:
+      free: [key,l]
+      types:
+        key: Table Index
+        d1: Number
+      tables:
+        index: key
+        columns: [d1, d2, s]
+        data:
+          M1.6: [-2.2, 4.5, 1.2 ]
+          M2.5: [ 2.5, 9.0, 12  ]
+
 ...

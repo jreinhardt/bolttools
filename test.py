@@ -15,35 +15,36 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import blt_parser
-import openscad, freecad, html
+import blt, openscad, freecad
+import yaml
 import unittest
+# pylint: disable=W0622
+from codecs import open
 from errors import *
 
+def load_coll(filename):
+	coll = list(yaml.load_all(open(filename,"r","utf8")))
+	return coll[0]
+
+
 class TestCollectionLoad(unittest.TestCase):
-
-	def test_empty(self):
-		self.assertRaises(MalformedCollectionError, lambda:
-			blt_parser.BOLTSCollection("test_collections/empty.blt")
-		)
-
 	def test_wrong_version(self):
 		self.assertRaises(VersionError, lambda:
-			blt_parser.BOLTSCollection("test_collections/wrong_version.blt")
+			blt.BOLTSCollection(load_coll("test/data/wrong_version.blt"))
 		)
 
 	def test_no_classes(self):
 		self.assertRaises(MissingFieldError, lambda:
-			blt_parser.BOLTSCollection("test_collections/no_classes.blt")
+			blt.BOLTSCollection(load_coll("test/data/no_classes.blt"))
 		)
 
 	def test_empty_classes(self):
 		self.assertRaises(MalformedCollectionError, lambda:
-			blt_parser.BOLTSCollection("test_collections/empty_classes.blt")
+			blt.BOLTSCollection(load_coll("test/data/empty_classes.blt"))
 		)
 
 	def test_minimal_class(self):
-		coll = blt_parser.BOLTSCollection("test_collections/minimal_class.blt")
+		coll = blt.BOLTSCollection(load_coll("test/data/minimal_class.blt"))
 		self.assertEqual(coll.author_names,["Johannes Reinhardt"])
 		self.assertEqual(coll.author_mails,["jreinhardt@ist-dein-freund.de"])
 		self.assertEqual(coll.license_name,"LGPL 2.1+")
@@ -56,7 +57,7 @@ class TestCollectionLoad(unittest.TestCase):
 		self.assertEqual(cl.parameters.free,[])
 
 	def test_parameters(self):
-		coll = blt_parser.BOLTSCollection("test_collections/parameters.blt")
+		coll = blt.BOLTSCollection(load_coll("test/data/parameters.blt"))
 
 		cl = coll.classes[0]
 		self.assertEqual(cl.parameters.free,['key','l'])
@@ -68,43 +69,49 @@ class TestCollectionLoad(unittest.TestCase):
 	def test_naming_error(self):
 		#wrong name for substitute field
 		self.assertRaises(UnknownFieldError, lambda:
-			blt_parser.BOLTSCollection("test_collections/naming.blt")
+			blt.BOLTSCollection(load_coll("test/data/naming.blt"))
 		)
 
 	def test_type_error1(self):
 		#additional parameter name in types
-		self.assertRaises(ValueError, lambda:
-			blt_parser.BOLTSCollection("test_collections/type_error1.blt")
+		self.assertRaises(UnknownParameterError, lambda:
+			blt.BOLTSCollection(load_coll("test/data/type_error1.blt"))
 		)
 	def test_type_error2(self):
 		#unknown type in types
-		self.assertRaises(ValueError, lambda:
-			blt_parser.BOLTSCollection("test_collections/type_error2.blt")
+		self.assertRaises(UnknownTypeError, lambda:
+			blt.BOLTSCollection(load_coll("test/data/type_error2.blt"))
 		)
 
 	def test_table_error(self):
 		#negative value for parameter of type length
 		self.assertRaises(ValueError, lambda:
-			blt_parser.BOLTSCollection("test_collections/table_error1.blt")
+			blt.BOLTSCollection(load_coll("test/data/table_error1.blt"))
 		)
 		#negative value for parameter of type number
-		blt_parser.BOLTSCollection("test_collections/table_error2.blt")
+		blt.BOLTSCollection(load_coll("test/data/table_error2.blt"))
 
-class TestRepository(unittest.TestCase):
-	def test_load(self):
-		repo = blt_parser.BOLTSRepository("test_repo")
+class TestBOLTSRepository(unittest.TestCase):
+	def test_empty(self):
+		self.assertRaises(MalformedCollectionError, lambda:
+			blt.BOLTSRepository("test/empty")
+		)
 
-	def test_openscad(self):
-		repo = blt_parser.BOLTSRepository("test_repo")
-		openscad.OpenSCADExporter().write_output(repo,"LGPL 2.1+")
+	def test_id_mismatch(self):
+		self.assertRaises(MalformedCollectionError, lambda:
+			blt.BOLTSRepository("test/id_mismatch")
+		)
 
-	def test_freecad(self):
-		repo = blt_parser.BOLTSRepository("test_repo")
-		freecad.FreeCADExporter().write_output(repo,"LGPL 2.1+")
+	def test_syntax(self):
+		blt.BOLTSRepository("test/syntax")
 
-	def test_html(self):
-		repo = blt_parser.BOLTSRepository("test_repo")
-		html.HTMLExporter().write_output(repo)
+class TestOpenSCAD(unittest.TestCase):
+	def test_syntax(self):
+		openscad.OpenSCADData("test/syntax")
+
+class TestFreeCAD(unittest.TestCase):
+	def test_syntax(self):
+		freecad.FreeCADData("test/syntax")
 
 if __name__ == '__main__':
 	unittest.main()
