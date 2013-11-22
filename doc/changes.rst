@@ -10,6 +10,9 @@ Changes of the BOLTS specifications
 * added "name" as a forbidden parameter name
 * moved collection information from header directly into the element
 * explicit collection id
+* factored databases out of what was backends
+* removed specifications of backends
+* moved infos about drawings into a separate database
 
 
 
