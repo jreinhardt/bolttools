@@ -149,6 +149,14 @@ class BOLTSCollection(YamlParser):
 					e.set_class(name)
 					raise
 
+	def classes_by_ids(self):
+		class_ids = []
+		for cl in self.classes:
+			if cl.id in class_ids:
+				continue
+			class_ids.append(cl.id)
+			yield cl
+
 #In contrast to the class-element specified in the blt, this structure has only
 #one name, a blt class element gets split into several BOLTSClasses during
 #parsing
