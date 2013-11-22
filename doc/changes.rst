@@ -8,6 +8,8 @@ Changes of the BOLTS specifications
 
 * added common field to the Parameter element
 * added "name" as a forbidden parameter name
+* moved collection information from header directly into the element
+* explicit collection id
 
 
 
