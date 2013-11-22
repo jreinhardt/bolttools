@@ -24,7 +24,7 @@ from codecs import open
 from errors import *
 from common import YamlParser, BOLTSParameters, BOLTSNaming, RE_ANGLED
 
-CURRENT_VERSION = 0.2
+CURRENT_VERSION = 0.3
 
 class BOLTSRepository:
 	#order is important
@@ -47,7 +47,7 @@ class BOLTSRepository:
 		for filename in os.listdir(join(path,"data")):
 			if splitext(filename)[1] == ".blt":
 
-				coll = list(yaml.load_all(open(filename,"r","utf8")))
+				coll = list(yaml.load_all(open(join(path,"data",filename),"r","utf8")))
 				if len(coll) == 0:
 					raise MalformedCollectionError(
 							"No YAML document found in file %s" % filename)
@@ -56,7 +56,7 @@ class BOLTSRepository:
 							"More than one YAML document found in file %s" % filename)
 
 				try:
-					self.collections.append(BOLTSCollection(coll))
+					self.collections.append(BOLTSCollection(coll[0]))
 				except ParsingError as e:
 					e.set_repo_path(path)
 					e.set_collection(filename)
@@ -69,8 +69,6 @@ class BOLTSRepository:
 				if self.collections[-1].id in ["common","gui","template"]:
 					raise MalformedCollectionError(
 							"Forbidden collection id: %s" % id)
-				return id
-
 
 		self.standardized = dict((body,[]) for body in self.standard_bodies)
 
@@ -98,29 +96,26 @@ class BOLTSRepository:
 
 class BOLTSCollection(YamlParser):
 	def __init__(self,coll):
-		YamlParser.__init__(self,coll,
-			["id","author","license","blt-version"],
+		YamlParser.__init__(self,coll,"collection",
+			["id","author","license","blt-version","classes"],
 			["name","description"]
 		)
 
-		version = coll["collection"]["blt-version"]
+		version = coll["blt-version"]
 		if version != CURRENT_VERSION:
 			raise VersionError(version)
 
-		#parse header
-		header = coll["collection"]
-
-		self.id = header["id"]
+		self.id = coll["id"]
 
 		self.name = ""
-		if "name" in header:
-			self.name = header["name"]
+		if "name" in coll:
+			self.name = coll["name"]
 
 		self.description = ""
-		if "description" in header:
-			self.description = header["description"]
+		if "description" in coll:
+			self.description = coll["description"]
 
-		self.authors = header["author"]
+		self.authors = coll["author"]
 		if isinstance(self.authors,str):
 			self.authors = [self.authors]
 
@@ -131,7 +126,7 @@ class BOLTSCollection(YamlParser):
 			self.author_names.append(match.group(1).strip())
 			self.author_mails.append(match.group(2).strip())
 
-		self.license = header["license"]
+		self.license = coll["license"]
 		match = RE_ANGLED.match(self.license)
 		self.license_name = match.group(1).strip()
 		self.license_url = match.group(2).strip()
@@ -159,7 +154,7 @@ class BOLTSCollection(YamlParser):
 #parsing
 class BOLTSClass(YamlParser):
 	def __init__(self,cl,name):
-		YamlParser.__init__(self,cl,
+		YamlParser.__init__(self,cl,"class",
 			["naming","source","id"],
 			["drawing","description","standard","status","replaces","parameters",
 				"url","notes"]
