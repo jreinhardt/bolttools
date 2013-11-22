@@ -15,7 +15,7 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import blt, openscad, freecad
+import blt, openscad, freecad, drawings
 import yaml
 import unittest
 # pylint: disable=W0622
@@ -103,15 +103,26 @@ class TestBOLTSRepository(unittest.TestCase):
 		)
 
 	def test_syntax(self):
-		blt.BOLTSRepository("test/syntax")
+		repo = blt.BOLTSRepository("test/syntax")
+		self.assertEqual(len(repo.collections),1)
 
 class TestOpenSCAD(unittest.TestCase):
 	def test_syntax(self):
-		openscad.OpenSCADData("test/syntax")
+		os = openscad.OpenSCADData("test/syntax")
+		self.assertTrue("hexscrew1" in os.getbase)
+		self.assertTrue("cube1" in os.getbase)
+		self.assertTrue("singlerowradialbearing" in os.getbase)
 
 class TestFreeCAD(unittest.TestCase):
 	def test_syntax(self):
-		freecad.FreeCADData("test/syntax")
+		fc = freecad.FreeCADData("test/syntax")
+		self.assertTrue("hexscrew1" in fc.getbase)
+		self.assertTrue("lack1" in fc.getbase)
+		self.assertTrue("singlerowradialbearing" in fc.getbase)
+
+class TestDrawings(unittest.TestCase):
+	def test_syntax(self):
+		draw = drawings.DrawingsData("test/syntax")
 
 if __name__ == '__main__':
 	unittest.main()
