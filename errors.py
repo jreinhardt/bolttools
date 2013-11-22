@@ -92,12 +92,14 @@ class UncommitedChangesError(Exception):
 
 class NonUniqueClassIdError(Exception):
 	def __init__(self,id):
+		Exception.__init__(self)
 		self.id = id
 	def __str__(self):
 		return "Encountered more than one class with the same id: %s" % self.id
 
 class IncompatibleLicenseError(Exception):
 	def __init__(self,msg):
+		Exception.__init__(self)
 		self.msg = msg
 	def __str__(self):
 		return self.msg

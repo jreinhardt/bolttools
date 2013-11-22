@@ -18,9 +18,7 @@
 #common elements and baseclasses
 
 import re
-from os import listdir,makedirs, remove
-from os.path import join, exists, isfile
-from shutil import rmtree
+from os.path import join
 from copy import deepcopy
 
 from errors import *
@@ -124,7 +122,7 @@ class BOLTSParameters:
 					discrete = False
 					break
 			if discrete and len(self.free) > 0:
-				self._populate_common([":" for i in range(len(self.free))],[],0)
+				self._populate_common([":" for _i in range(len(self.free))],[],0)
 
 	def _populate_common(self, tup, values, idx):
 		if idx == len(self.free):

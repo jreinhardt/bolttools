@@ -17,7 +17,7 @@
 
 import yaml
 import os
-from os.path import splitext, split, exists, join
+from os.path import splitext, exists, join
 # pylint: disable=W0622
 from codecs import open
 

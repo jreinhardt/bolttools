@@ -16,12 +16,10 @@
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import yaml
-from os import listdir,makedirs
-from os.path import join, exists, basename
-from shutil import copy
+from os import listdir
+from os.path import join, exists
 # pylint: disable=W0622
 from codecs import open
-from datetime import datetime
 
 from errors import *
 from common import BackendData, BaseBase, BOLTSParameters, check_schema

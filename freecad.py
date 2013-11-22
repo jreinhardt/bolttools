@@ -14,13 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import yaml
-import importlib
-from os import listdir, makedirs, remove
+from os import listdir
 from os.path import join, exists, basename, splitext
-from shutil import copy, copytree
 # pylint: disable=W0622
 from codecs import open
-from datetime import datetime
 
 from common import check_schema, BackendData, BaseBase, BOLTSParameters
 from errors import *
