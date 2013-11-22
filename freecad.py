@@ -22,13 +22,6 @@ from codecs import open
 from common import check_schema, DataBase, GeometryBase, BOLTSParameters
 from errors import *
 
-SPEC = {
-	"file-function" : (),
-	"file-fcstd" : (),
-	"function" : (["name","classids"],["parameters"]),
-	"object" : (),
-}
-
 class FreeCADGeometry(GeometryBase):
 	def __init__(self,basefile,collname,backend_root):
 		GeometryBase.__init__(self,basefile,collname)
