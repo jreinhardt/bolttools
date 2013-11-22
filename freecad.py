@@ -80,6 +80,15 @@ class FreeCADData(DataBase):
 		DataBase.__init__(self,"freecad",path)
 		self.getbase = {}
 
+		if not exists(path):
+			e = MalformedRepositoryError("Repo directory does not exist")
+			e.set_repo_path(path)
+			raise e
+		if not exists(join(self.backend_root)):
+			e = MalformedRepositoryError("freecad directory does not exist")
+			e.set_repo_path(path)
+			raise e
+
 		for coll in listdir(self.backend_root):
 			basefilename = join(self.backend_root,coll,"%s.base" % coll)
 			if not exists(basefilename):
