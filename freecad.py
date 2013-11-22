@@ -19,7 +19,7 @@ from os.path import join, exists, basename, splitext
 # pylint: disable=W0622
 from codecs import open
 
-from common import check_schema, BackendData, BaseBase, BOLTSParameters
+from common import check_schema, DataBase, GeometryBase, BOLTSParameters
 from errors import *
 
 SPEC = {
@@ -29,13 +29,13 @@ SPEC = {
 	"object" : (),
 }
 
-class FreeCADBase(BaseBase):
+class FreeCADGeometry(GeometryBase):
 	def __init__(self,basefile,collname,backend_root):
-		BaseBase.__init__(self,basefile,collname)
+		GeometryBase.__init__(self,basefile,collname)
 		self.filename = join(backend_root,collname,basefile["filename"])
 		self.path = join(collname,self.filename)
 
-class BaseFunction(FreeCADBase):
+class BaseFunction(FreeCADGeometry):
 	def __init__(self,function,basefile,collname,backend_root):
 		check_schema(function,"basefunction",
 			["name","classids"],
@@ -46,7 +46,7 @@ class BaseFunction(FreeCADBase):
 			["source"]
 		)
 
-		FreeCADBase.__init__(self,basefile,collname,backend_root)
+		FreeCADGeometry.__init__(self,basefile,collname,backend_root)
 		self.name = function["name"]
 		self.classids = function["classids"]
 		self.module_name = splitext(basename(self.filename))[0]
@@ -55,7 +55,7 @@ class BaseFunction(FreeCADBase):
 		else:
 			self.parameters = BOLTSParameters({})
 
-class BaseFcstd(FreeCADBase):
+class BaseFcstd(FreeCADGeometry):
 	def __init__(self,obj,basefile, collname,backend_root):
 		check_schema(basefile,"basefcstd",
 			["filename","author","license","type","objects"],
@@ -65,7 +65,7 @@ class BaseFcstd(FreeCADBase):
 			["proptoparam","parameters"]
 		)
 
-		FreeCADBase.__init__(self,basefile,collname,backend_root)
+		FreeCADGeometry.__init__(self,basefile,collname,backend_root)
 		self.objectname = obj["objectname"]
 		self.proptoparam = {self.objectname : {"Label" : "name"}}
 		if "proptoparam" in obj:
@@ -75,9 +75,9 @@ class BaseFcstd(FreeCADBase):
 		else:
 			self.parameters = BOLTSParameters({})
 
-class FreeCADData(BackendData):
+class FreeCADData(DataBase):
 	def __init__(self,path):
-		BackendData.__init__(self,"freecad",path)
+		DataBase.__init__(self,"freecad",path)
 		self.getbase = {}
 
 		for coll in listdir(self.backend_root):

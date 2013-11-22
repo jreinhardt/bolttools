@@ -22,11 +22,11 @@ from os.path import join, exists
 from codecs import open
 
 from errors import *
-from common import BackendData, BaseBase, BOLTSParameters, check_schema
+from common import DataBase, GeometryBase, BOLTSParameters, check_schema
 
-class OpenSCADBase(BaseBase):
+class OpenSCADGeometry(GeometryBase):
 	def __init__(self,basefile,collname):
-		BaseBase.__init__(self,basefile,collname)
+		GeometryBase.__init__(self,basefile,collname)
 		self.filename = basefile["filename"]
 		self.path = join(collname,self.filename)
 	def get_copy_files(self):
@@ -39,7 +39,7 @@ class OpenSCADBase(BaseBase):
 		"Return the incantation of the base that produces the geometry"
 		raise NotImplementedError
 
-class BaseModule(OpenSCADBase):
+class BaseModule(OpenSCADGeometry):
 	def __init__(self,mod,basefile,collname):
 		check_schema(mod,"basemodule",
 			["name", "arguments","classids"],
@@ -48,7 +48,7 @@ class BaseModule(OpenSCADBase):
 			["filename","author","license","type","modules"],
 			["source"])
 
-		OpenSCADBase.__init__(self,basefile,collname)
+		OpenSCADGeometry.__init__(self,basefile,collname)
 		self.name = mod["name"]
 		self.arguments = mod["arguments"]
 		self.classids = mod["classids"]
@@ -66,12 +66,12 @@ class BaseModule(OpenSCADBase):
 		return "%s(%s)" % (self.name,", ".join(args[arg] for arg in self.arguments))
 
 
-class BaseSTL(OpenSCADBase):
+class BaseSTL(OpenSCADGeometry):
 	def __init__(self,basefile,collname):
 		check_schema(basefile,"basestl",
 			["filename","author","license","type","classids"],
 			["source"])
-		OpenSCADBase.__init__(self,basefile,collname)
+		OpenSCADGeometry.__init__(self,basefile,collname)
 		self.classids = basefile["classids"]
 
 		if "parameters" in basefile:
@@ -87,9 +87,9 @@ class BaseSTL(OpenSCADBase):
 		return 'import("%s")' % join("base",self.filename)
 
 
-class OpenSCADData(BackendData):
+class OpenSCADData(DataBase):
 	def __init__(self,path):
-		BackendData.__init__(self,"openscad",path)
+		DataBase.__init__(self,"openscad",path)
 		#maps class id to base module
 		self.getbase = {}
 

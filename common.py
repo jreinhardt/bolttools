@@ -220,13 +220,13 @@ class BOLTSNaming:
 		return self.template % tuple(params[s] for s in self.substitute)
 
 
-class BackendData:
+class DataBase:
 	def __init__(self,name,path):
 		self.repo_root = path
 		self.backend_root = join(path,name)
 		self.out_root = join(path,"output",name)
 
-class BaseBase:
+class GeometryBase:
 	def __init__(self,basefile,collname):
 		self.collection = collname
 
