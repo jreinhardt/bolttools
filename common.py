@@ -27,20 +27,19 @@ from errors import *
 
 RE_ANGLED = re.compile("([^<]*)<([^>]*)")
 
-class YamlParser:
-	def __init__(self, yaml_dict, element_name, mandatory_fields, optional_fields):
-		#check dict from YAML parsing for correct fields
-		for key in yaml_dict.keys():
-			if key in mandatory_fields:
-				mandatory_fields.remove(key)
-			elif key in optional_fields:
-				optional_fields.remove(key)
-			else:
-				raise UnknownFieldError(element_name,key)
-		if len(mandatory_fields) > 0:
-			raise MissingFieldError(element_name,mandatory_fields)
+def check_schema(yaml_dict, element_name, mandatory_fields, optional_fields):
+	#check dict from YAML parsing for correct and complete fields
+	for key in yaml_dict.keys():
+		if key in mandatory_fields:
+			mandatory_fields.remove(key)
+		elif key in optional_fields:
+			optional_fields.remove(key)
+		else:
+			raise UnknownFieldError(element_name,key)
+	if len(mandatory_fields) > 0:
+		raise MissingFieldError(element_name,mandatory_fields)
 
-class BOLTSParameters(YamlParser):
+class BOLTSParameters:
 	type_defaults = {
 		"Length (mm)" : 10,
 		"Length (in)" : 1,
@@ -50,7 +49,7 @@ class BOLTSParameters(YamlParser):
 		"String" : ''
 	}
 	def __init__(self,param):
-		YamlParser.__init__(self,param,"parameters",
+		check_schema(param,"parameters",
 			[],
 			["literal","free","tables","types","defaults","common"]
 		)
@@ -175,9 +174,9 @@ class BOLTSParameters(YamlParser):
 			res.defaults[pname] = tname
 		return res
 
-class BOLTSTable(YamlParser):
+class BOLTSTable:
 	def __init__(self,table):
-		YamlParser.__init__(self,table,"table",
+		check_schema(table,"table",
 			["index","columns","data"],
 			[]
 		)
@@ -207,9 +206,9 @@ class BOLTSTable(YamlParser):
 					if tname == "Bool":
 						row[i] = bool(row[i])
 
-class BOLTSNaming(YamlParser):
+class BOLTSNaming:
 	def __init__(self,name):
-		YamlParser.__init__(self,name,"naming",
+		check_schema(name,"naming",
 			["template"],
 			["substitute"]
 		)

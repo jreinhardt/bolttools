@@ -22,7 +22,7 @@ from os.path import splitext, split, exists, join
 from codecs import open
 
 from errors import *
-from common import YamlParser, BOLTSParameters, BOLTSNaming, RE_ANGLED
+from common import BOLTSParameters, BOLTSNaming, RE_ANGLED, check_schema
 
 CURRENT_VERSION = 0.3
 
@@ -94,9 +94,9 @@ class BOLTSRepository:
 						self.standardized[body][idx].replacedby = cl.name
 						break
 
-class BOLTSCollection(YamlParser):
+class BOLTSCollection:
 	def __init__(self,coll):
-		YamlParser.__init__(self,coll,"collection",
+		check_schema(coll,"collection",
 			["id","author","license","blt-version","classes"],
 			["name","description"]
 		)
@@ -160,9 +160,9 @@ class BOLTSCollection(YamlParser):
 #In contrast to the class-element specified in the blt, this structure has only
 #one name, a blt class element gets split into several BOLTSClasses during
 #parsing
-class BOLTSClass(YamlParser):
+class BOLTSClass:
 	def __init__(self,cl,name):
-		YamlParser.__init__(self,cl,"class",
+		check_schema(cl,"class",
 			["naming","source","id"],
 			["drawing","description","standard","status","replaces","parameters",
 				"url","notes"]
