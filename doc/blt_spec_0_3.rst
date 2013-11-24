@@ -12,16 +12,17 @@ Parts, Classes, Standards and Collections
 
 
 In this section some concepts are defined, that will be used later in the
-specification of blt-files_.
+specification of the blt-file_.
 
 .. _part:
 
 Parts
 =====
 
-A BOLTS repository_ contains a data about objects, that are in some way useful
-in CAD. A part is a object that can be described by a set of dimensions. E.g. a
-piece of paper is described by its width of 210mm and its height of 297mm.
+A BOLTS repository_ contains a various sorts of data about objects, that are in
+some way useful in CAD. A part is a object that can be described by a set of
+dimensions. E.g. a piece of paper is described by its width of 210mm and its
+height of 297mm.
 
 .. _class:
 
@@ -34,27 +35,28 @@ efficiently described as a class of parts. To continue with the paper example,
 a class describing pieces class could also contain a part with width 100mm and
 height 100mm.
 
-In blt-files_ classes of parts are described, because this case is so frequent.
-Because some parts are one of a kind, it is not uncommon to have classes that
+In a blt-file_ classes of parts are described, because this case is so frequent.
+Some parts are one of a kind, so it is not uncommon to have classes that
 contain just a single part.
 
 The classes of technical parts that BOLTS deals with are often specified by
-standards issued by standardization bodies. blt-files_ allow to specify this
-for a class.
+standards issued by standardization bodies. This can be specified for a class
+in the blt-file_.
 
 .. _collection:
 
 Collections
 ===========
 
-It is convenient to organize the classes that we have in a bolts repository in
+It turns out to be convenient to organize the classes of a bolts repository in
 collections. A collection usually has one or few authors, the parts contained
 are in some sense related to each other and all the data of a collection is
 under the same licence.
 
 Each collection has a one word identifier, the collection id. The collection id
-is the filename (without extension) of the blt-files_ with the information about
-the collection. For more details information see blt-files_.
+is the filename (without extension) of the blt-file_ with the information about
+the collection, and also explicitly specified in the blt-file_. For more
+details information see there.
 
 .. _repository:
 
@@ -64,16 +66,16 @@ The repository
 
 A BOLTS repository is directory structure with a certain layout. It contains
 all the data and metadata. The root directory contains at least a "data"
-directory that contains the backend independent data, plus optionally a number
-of database directories with data that can be used by a backend_. See
+directory with the backend independent data in blt-file_, plus optionally a
+number of database directories with data that can be used by a backend_. See
 list-of-databases_ for details.
 
 The data directory
 ==================
 
-The data directory contains a number of blt-files_, one for each collection_.
-These files contain most of the backend independent information about the parts
-in the repository.
+The data directory contains a number of blt-file_, one for each collection_.
+These files contain the backend independent information about the parts in the
+repository.
 
 .. _database:
 
@@ -81,12 +83,13 @@ The databases
 =============
 
 A database directory is a directory that contains data about certain aspects of
-the parts or data in a specific form. Backends can access this data to
+the parts or data in a specific form.Backends can access this data to
 transform the parts data into specific forms or collect informations.
 
-The data in the database directories is optional. If for a class_ this data is
-not available, the backend_ has to be able to deal with it in an appropriate
-manner, for example by not processing this class.
+In contrast to the data in the blt-file_, the data in the database directories
+is optional. If for a class_ this data is not available, the backend_ has to be
+able to deal with it in an appropriate manner, for example by not processing
+this class.
 
 
 **************************************
@@ -94,7 +97,7 @@ Backends, Processing and Distributions
 **************************************
 
 In BOLTS the backend independent data and metadata is separated from the
-backend specific data. The former is held in blt-files_, the latter in
+backend specific data. The former is held in blt-file_, the latter in
 database_ directories.
 
 .. _backend:
@@ -105,29 +108,29 @@ Backend
 .. _distribution:
 
 A backend is a process that uses backend independent data and data from
-database_ and transforms this data into a set of files. This output is called
+database_, transforms this data and outputs a set of files. This output is called
 the distribution.
 
 .. image:: processing_0.3.png
    :width: 100%
 
 
-A example for a backend would be a process that uses the backend indepent data
+Am example for a backend would be a process that uses the backend indepent data
 about parts, their geometries and dimensions together with a number of
 templates and stylesheets and produces a set of HTML pages with a nicely
 rendered, browsable description of the parts. Other backends could produce data
 that is suitable for use in specific CAD applications.
 
-Backends are not specified in details by this specification.
+Backends are not specified in detail by this specification.
 
-.. _blt-files:
+.. _blt-file:
 
 Backend independent data - the blt file
 =======================================
 
-The backend independent data is stored in `yaml <http://yaml.org/>`_ files
-with the extension .blt with exactly one YAML document and containing an
-associative array with the following keys:
+The backend independent data is stored in `yaml <http://yaml.org/>`_ files with
+the extension .blt. These files contain exactly one YAML document consisting of
+an associative array with the following keys:
 
 - id: mandatory, string. The id of the collection. Must be identical to the
   filename of the blt file without the extenstion.
@@ -144,12 +147,12 @@ associative array with the following keys:
   follows.
 - classes: mandatory. An list of class-element_.
 
-The filename without the .blt extension is called the collection id. Collection
-ids are one word identifiers, which must be unique within the repository. This
-class id is used as a way to refer to the class, when the standard field is not
-set.  They should contain only letters, numbers and underscores, and should be
-descriptive, as they may be visible to the user. Some names can not be
-collection ids: common, gui, template
+The filename without the .blt extension is called the collection id. For
+consistency they are repeated in the id field. Collection ids are one word
+identifiers, which must be unique within the repository.  They should contain
+only letters, numbers and underscores, and should be descriptive, as they may
+be visible to the user. Some names can not be collection ids: common, gui,
+template
 
 .. _class-element:
 
@@ -168,8 +171,8 @@ class_. It has the following keys:
   class.
 - description: optional, string. A short description of the class.
 - standard: optional, string or list of strings. The name of the standard, if
-  class is standardized. In the case of several identical standards, a list of
-  names can be given.
+  class is standardized. In the case of multiple standards with identical
+  specifications, a list of names can be given.
 - status: optional, string. This can be used to indicate the status of the
   standard.  Possible values are "active" and "withdrawn", if absent, "active"
   is assumed.
@@ -180,8 +183,8 @@ class_. It has the following keys:
   regarding the parts of this class. For example a link to a vendor, or to the
   specifying standard.  In the case of several identical standards, a list of
   urls has to be given.
-- notes: optional, string. Notes for this class. Can be used to formulate
-  questions or additional information.
+- notes: optional, string. Notes for this class. Can be used to keep questions
+  or additional information.
 - source: mandatory, string. A short description where the informations for this
   class originate. Should contain a URL if possible.
 
@@ -192,16 +195,16 @@ Parameter element
 
 A parameter element is an associative array that holds information about the
 parameters of a part. This information is used when doing
-parameter-collection_. Parameters are usually dimensions, but are not
+parameter-collection_. Parameters are often dimensions, but are not
 restricted to be. The following keys are contained in a parameter element.
 
 - literal: optional, associative array. This array has as its key the parameter
   names of the literal parameters, as values the corresponding values. Literal
   parameters are rarely used.
-- free: optional, list. This list contains the names of the parameters that are
-  not assigned a value. Usually the user will provide this value.
+- free: optional, list. This list contains the names of the parameters for
+  which the user will provide this value.
 - tables: optional, table-element_ or list of table-elements. This array
-  contains tabular data. Often the table index will be a free variable, for
+  contains tabular data. Usually the table index will be a free variable, for
   details see table-element_ and parameter-collection_.
 - types: optional, associative array. Contains as keys parameter names, as
   values their respective types. Possible types are: "Length (mm)", Length
@@ -216,22 +219,22 @@ restricted to be. The following keys are contained in a parameter element.
   YAML list and contain common combinations of parameters. For more compact
   notation, every element of the tuple actually is a list of values, so the
   tuple represents all possible combinations of values for the parameters. A
-  tuple element can also be ":" for a free variable of type Bool or Table
-  Index, being a shorthand for all possible values.Defaults to the empty list,
-  if at least one free variable is of type length, number or string. If all
-  free variables are of type "Table Index" or "Bool", the default is the tuple
-  with all possible parameter combinations.
+  tuple element can also be ":" if the free variable is discrete (see table
+  below), the being a shorthand for all possible values. Defaults to the empty
+  list, if at least one free variable is not discrete. If all free variables
+  are discrete, the default is the tuple with all possible parameter
+  combinations.
 
-============  ==============
-Type          Default Value
-============  ==============
-Length (mm)   10
-Length (in)   1
-Number        1
-Bool          False
-Table Index   ""
-String        ""
-============  ==============
+============  ==============  =========
+Type          Default Value   Discrete
+============  ==============  =========
+Length (mm)   10              no
+Length (in)   1               no
+Number        1               no
+Bool          False           yes
+Table Index   ""              yes
+String        ""              no
+============  ==============  =========
 
 Some parameter names are forbidden: standard, name.
 
@@ -410,6 +413,7 @@ with the following keys:
   supported-licenses_.
 - type: "drawing"
 - source: optional, string. A string describing the origin of the file.
+- classids: mandatory, list of strings. The class_ ids to which this drawing applies.
 
 
 .. _base-file-type-module:
