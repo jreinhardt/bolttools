@@ -224,7 +224,6 @@ class DataBase:
 	def __init__(self,name,path):
 		self.repo_root = path
 		self.backend_root = join(path,name)
-		self.out_root = join(path,"output",name)
 
 class GeometryBase:
 	def __init__(self,basefile,collname):
