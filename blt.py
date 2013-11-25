@@ -164,7 +164,7 @@ class BOLTSClass:
 	def __init__(self,cl,name):
 		check_schema(cl,"class",
 			["naming","source","id"],
-			["drawing","description","standard","status","replaces","parameters",
+			["description","standard","status","replaces","parameters",
 				"url","notes"]
 		)
 

@@ -22,17 +22,19 @@ from os.path import join, exists
 from codecs import open
 
 from errors import *
-from common import DataBase, BOLTSParameters, check_schema
+from common import GeometryBase, DataBase, BOLTSParameters, check_schema
 
-class Drawing:
+class Drawing(GeometryBase):
 	def __init__(self,basefile,collname,backend_root):
+		GeometryBase.__init__(self,basefile,collname)
 		check_schema(basefile,"drawing",
 			["filename","author","license","type","classids"],
 			["source"]
 		)
 		self.collection = collname
-		self.filename = join(backend_root,collname,basefile["filename"])
-		self.path = join(collname,self.filename)
+		self.filename = basefile["filename"]
+		self.path = join(backend_root,collname,self.filename)
+		self.classids = basefile["classids"]
 
 class DrawingsData(DataBase):
 	def __init__(self,path):
