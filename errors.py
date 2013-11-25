@@ -33,14 +33,6 @@ class ParsingError(Exception):
 			for k,v in self.trace_info.iteritems())
 		return "%s.  %s" % (self.msg, trace)
 
-class BackendError(Exception):
-	def __init__(self,backendname):
-		Exception.__init__(self)
-		self.backendname = backendname
-		self.msg = ""
-	def __str__(self):
-		return "Problem in backend %s:\n" + self.msg
-
 class VersionError(ParsingError):
 	def __init__(self,version):
 		ParsingError.__init__(self)
@@ -86,25 +78,7 @@ class UnknownTypeError(ParsingError):
 		ParsingError.__init__(self)
 		self.msg = "Unknown type in types: %s" % tname
 
-class UncommitedChangesError(Exception):
-	def __str__(self):
-		return "There are uncommited changes in the git repo"
-
-class NonUniqueClassIdError(Exception):
+class NonUniqueBaseError(ParsingError):
 	def __init__(self,id):
-		Exception.__init__(self)
-		self.id = id
-	def __str__(self):
-		return "Encountered more than one class with the same id: %s" % self.id
-
-class IncompatibleLicenseError(Exception):
-	def __init__(self,msg):
-		Exception.__init__(self)
-		self.msg = msg
-	def __str__(self):
-		return self.msg
-
-class BackendNotAvailableError(BackendError):
-	def __init__(self,backendname):
-		BackendError.__init__(self,backendname)
-		self.msg = "The backend is not available in this repo"
+		ParsingError.__init__(self)
+		self.msg = "Encountered more than one base for class with id: %s" % id

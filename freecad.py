@@ -101,6 +101,8 @@ class FreeCADData(DataBase):
 						try:
 							function = BaseFunction(func,basefile,coll,self.backend_root)
 							for id in func["classids"]:
+								if id in self.getbase:
+									raise NonUniqueBaseError(id)
 								self.getbase[id] = function
 						except ParsingError as e:
 							e.set_base(basefile["filename"])
@@ -114,6 +116,8 @@ class FreeCADData(DataBase):
 						try:
 							fcstd = BaseFcstd(obj,basefile,coll,self.backend_root)
 							for id in obj["classids"]:
+								if id in self.getbase:
+									raise NonUniqueBaseError(id)
 								self.getbase[id] = fcstd
 						except ParsingError as e:
 							e.set_base(basefile["filename"])

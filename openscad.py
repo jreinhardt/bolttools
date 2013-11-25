@@ -24,6 +24,7 @@ from codecs import open
 from errors import *
 from common import DataBase, GeometryBase, BOLTSParameters, check_schema
 
+
 class OpenSCADGeometry(GeometryBase):
 	def __init__(self,basefile,collname):
 		GeometryBase.__init__(self,basefile,collname)
@@ -38,6 +39,7 @@ class OpenSCADGeometry(GeometryBase):
 	def get_incantation(self,args):
 		"Return the incantation of the base that produces the geometry"
 		raise NotImplementedError
+
 
 class BaseModule(OpenSCADGeometry):
 	def __init__(self,mod,basefile,collname):
@@ -93,7 +95,6 @@ class OpenSCADData(DataBase):
 		#maps class id to base module
 		self.getbase = {}
 
-
 		if not exists(path):
 			e = MalformedRepositoryError("Repo directory does not exist")
 			e.set_repo_path(path)
@@ -120,7 +121,7 @@ class OpenSCADData(DataBase):
 							module = BaseModule(mod,basefile,coll)
 							for id in module.classids:
 								if id in self.getbase:
-									raise MalformedRepositoryError("Non-unique base for classid: %s" % id)
+									raise NonUniqueBaseError(id)
 								self.getbase[id] = module
 						except ParsingError as e:
 							e.set_base(basefile["filename"])
@@ -130,7 +131,7 @@ class OpenSCADData(DataBase):
 						module = BaseSTL(basefile,coll)
 						for id in module.classids:
 							if id in self.getbase:
-								raise NonUniqueClassIdError(id)
+								raise NonUniqueBaseError(id)
 							self.getbase[id] = module
 					except ParsingError as e:
 						e.set_base(basefile["filename"])
