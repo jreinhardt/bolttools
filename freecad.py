@@ -68,6 +68,8 @@ class BaseFcstd(FreeCADGeometry):
 		else:
 			self.parameters = BOLTSParameters({})
 
+		self.classids = obj["classids"]
+
 class FreeCADData(DataBase):
 	def __init__(self,path):
 		DataBase.__init__(self,"freecad",path)
