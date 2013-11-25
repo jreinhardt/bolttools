@@ -17,7 +17,8 @@
 
 import yaml
 from os import listdir
-from os.path import join, exists
+from glob import iglob
+from os.path import join, exists, splitext
 # pylint: disable=W0622
 from codecs import open
 
@@ -35,6 +36,21 @@ class Drawing(GeometryBase):
 		self.filename = basefile["filename"]
 		self.path = join(backend_root,collname,self.filename)
 		self.classids = basefile["classids"]
+
+		self.versions = {}
+	 	for version in iglob(self.path + ".*"):
+			ext = splitext(version)[1][1:]
+			self.versions[ext] = version
+
+	def get_png(self):
+		if "png" not in self.versions:
+			return None
+		return self.versions["png"]
+
+	def get_svg(self):
+		if "svg" not in self.versions:
+			return None
+		return self.versions["svg"]
 
 class DrawingsData(DataBase):
 	def __init__(self,path):
