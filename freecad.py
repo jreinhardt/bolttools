@@ -25,8 +25,8 @@ from errors import *
 class FreeCADGeometry(GeometryBase):
 	def __init__(self,basefile,collname,backend_root):
 		GeometryBase.__init__(self,basefile,collname)
-		self.filename = join(backend_root,collname,basefile["filename"])
-		self.path = join(collname,self.filename)
+		self.filename = basefile["filename"]
+		self.path = join(backend_root,collname,self.filename)
 
 class BaseFunction(FreeCADGeometry):
 	def __init__(self,function,basefile,collname,backend_root):
