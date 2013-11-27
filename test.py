@@ -15,7 +15,7 @@
 #License along with this library; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import blt, openscad, freecad, drawings
+import blt, openscad, freecad, drawings, solidworks
 import yaml
 import unittest
 # pylint: disable=W0622
@@ -123,6 +123,10 @@ class TestFreeCAD(unittest.TestCase):
 class TestDrawings(unittest.TestCase):
 	def test_syntax(self):
 		draw = drawings.DrawingsData("test/syntax")
+
+class TestSolidWorks(unittest.TestCase):
+	def test_syntax(self):
+		draw = solidworks.SolidWorksData("test/syntax")
 
 if __name__ == '__main__':
 	unittest.main()
