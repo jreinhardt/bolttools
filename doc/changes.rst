@@ -13,6 +13,7 @@ Changes of the BOLTS specifications
 * factored databases out of what was backends
 * removed specifications of backends
 * moved infos about drawings into a separate database
+* added SolidWorks database
 
 
 
