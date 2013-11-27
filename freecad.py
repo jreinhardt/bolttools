@@ -19,12 +19,12 @@ from os.path import join, exists, basename, splitext
 # pylint: disable=W0622
 from codecs import open
 
-from common import check_schema, DataBase, GeometryBase, BOLTSParameters
+from common import check_schema, DataBase, BaseElement, BOLTSParameters
 from errors import *
 
-class FreeCADGeometry(GeometryBase):
+class FreeCADGeometry(BaseElement):
 	def __init__(self,basefile,collname,backend_root):
-		GeometryBase.__init__(self,basefile,collname)
+		BaseElement.__init__(self,basefile,collname)
 		self.filename = basefile["filename"]
 		self.path = join(backend_root,collname,self.filename)
 

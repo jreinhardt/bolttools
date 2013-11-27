@@ -225,7 +225,7 @@ class DataBase:
 		self.repo_root = path
 		self.backend_root = join(path,name)
 
-class GeometryBase:
+class BaseElement:
 	def __init__(self,basefile,collname):
 		self.collection = collname
 
@@ -243,6 +243,8 @@ class GeometryBase:
 		match = RE_ANGLED.match(self.license)
 		self.license_name = match.group(1).strip()
 		self.license_url = match.group(2).strip()
+
+		self.type = basefile["type"]
 
 		self.source = ""
 		if "source" in basefile:

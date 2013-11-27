@@ -22,12 +22,12 @@ from os.path import join, exists
 from codecs import open
 
 from errors import *
-from common import DataBase, GeometryBase, BOLTSParameters, check_schema
+from common import DataBase, BaseElement, BOLTSParameters, check_schema
 
 
-class OpenSCADGeometry(GeometryBase):
+class OpenSCADGeometry(BaseElement):
 	def __init__(self,basefile,collname):
-		GeometryBase.__init__(self,basefile,collname)
+		BaseElement.__init__(self,basefile,collname)
 		self.filename = basefile["filename"]
 		self.path = join(collname,self.filename)
 	def get_copy_files(self):

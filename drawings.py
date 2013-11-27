@@ -23,11 +23,11 @@ from os.path import join, exists, splitext
 from codecs import open
 
 from errors import *
-from common import GeometryBase, DataBase, BOLTSParameters, check_schema
+from common import BaseElement, DataBase, BOLTSParameters, check_schema
 
-class Drawing(GeometryBase):
+class Drawing(BaseElement):
 	def __init__(self,basefile,collname,backend_root):
-		GeometryBase.__init__(self,basefile,collname)
+		BaseElement.__init__(self,basefile,collname)
 		check_schema(basefile,"drawing",
 			["filename","author","license","type","classids"],
 			["source"]

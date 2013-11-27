@@ -23,7 +23,7 @@ from os.path import join, exists, splitext
 from codecs import open
 
 from errors import *
-from common import GeometryBase, DataBase, BOLTSParameters, BOLTSNaming, check_schema
+from common import BaseElement, DataBase, BOLTSParameters, BOLTSNaming, check_schema
 
 class DesignTableClass:
 	def __init__(self,cl):
@@ -39,14 +39,14 @@ class DesignTableClass:
 			self.naming = BOLTSNaming(cl["naming"])
 
 
-class DesignTable(GeometryBase):
+class DesignTable(BaseElement):
 	def __init__(self,designtable,collname,backend_root):
+		BaseElement.__init__(self,designtable,collname)
 		check_schema(designtable,"basesolidworks",
 			["filename","author","license","type","suffix","params","classes"],
 			["source","metadata"]
 		)
 
-		GeometryBase.__init__(self,designtable,collname)
 		self.filename = designtable["filename"]
 		self.path = join(backend_root,collname,self.filename)
 
