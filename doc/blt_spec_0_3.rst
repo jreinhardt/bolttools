@@ -384,7 +384,7 @@ FreeCAD
 
 The "freecad" directory contains files that allow to build a geometrical
 representation of a class in FreeCAD. This directory contains a folder for each
-collection_ that contains files related to this collection.
+collection_ with the files related to classes in this collection.
 
 The geometrical representation can either be in the form of python function
 that constructs the part using the scripting facilities of FreeCAD, or in form
@@ -393,11 +393,31 @@ of FreeCAD model files. The base-files_ contains base-file-element_ of type
 "fcstd" (see base-file-type-fcstd_) for the latter form.
 
 
+**********
+SolidWorks
+**********
+
+The "solidworks" directory contains files necessary to build "design tables"
+for use with the `SolidWorks software <http://www.solidworks.com/>`_. This
+directory contains a folder for each collection_ with the files related to
+classes in this collection.
+
+The geometrical representation of the parts is supplied in the form of
+parametrized models. Together with "design tables" these models allow to easily
+obtain different sizes and variations of a part.
+
+All the information necessary to build the design table is contained in the
+base-files_ , which contain a list of base-file-element_ of type "solidworks"
+(see base-file-type-solidworks_ ).
+
+
 .. _list-of-base-file-types:
 
 #######################
 List of base file types
 #######################
+
+.. _base-file-type-drawing:
 
 *******
 Drawing
@@ -406,7 +426,9 @@ Drawing
 This kind of base-file-element_ describes a drawing. It is an associative array
 with the following keys:
 
-- filename: mandatory, string. The filename of the file
+- filename: mandatory, string. The filename of the file without the extension.
+  Files with the same basename but different extensions are taken to be
+  conversions to different file formats.
 - author: mandatory, string or list of strings. The author of the file with
   e-mail adress in <> or a list of several authors.
 - license: mandatory, string. The license of the file. Must be one of the
@@ -545,7 +567,46 @@ Document. It has the following keys:
   "name"}}
 
 
-.. _base-file-type-drawing:
+.. _base-file-type-solidworks:
+
+**********
+Solidworks
+**********
+
+This kind of base-file-element_ contains all the information necessary to
+create a design table that can be used together with a model file to create a
+"configuration". It is an associative array with the following keys:
+
+- filename: mandatory, string. The filename of the SolidWorks model file
+- author: mandatory, string or list of strings. The author of the model file
+  with e-mail adress in <> or a list of several authors.
+- license: mandatory, string. The license of the file. Must be one of the
+  supported-licenses_.
+- type: "solidworks"
+- suffix: mandatory, string. A descriptive suffix that can be used as part of
+  a filename. Gets appended to the model filename to construct the filename
+  for the design table.
+- params: mandatory, associative array. This describes the mapping from the
+  parameters in the model files to the BOLTS parameter names. This has to
+  apply to all classes that will be included in this table.
+- metadata: optional, associative array. This describes the mapping from
+  metadata fields to BOLTS parameter names. This has to apply to all classes
+  that will be included in this table.
+- source: optional, string. A string describing the origin of the file.
+- classes: mandatory, list of base-designtable-class-element_.
+
+.. _base-designtable-class-element:
+
+Base designtable class element
+==============================
+
+A designtable class element specifies the classes that should be included in a designtable.
+
+- classid: mandatory, string. A classid that should be included in
+  this designtable.
+- naming: optional, naming-element_. This describes the form of the
+  configuration names in the design table. If absent, the naming field of the
+  class is used.
 
 
 .. _supported-licenses:
