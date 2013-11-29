@@ -202,6 +202,8 @@ class BOLTSTable:
 					if tname in positive and row[i] < 0:
 						raise ValueError("Negative length in table: %f" % row[i])
 					if tname == "Bool":
+						if not row[i] in ["True","False"]:
+							raise ValueError("Unknown value for bool parameter: %s" % row[i])
 						row[i] = bool(row[i])
 
 class BOLTSNaming:
