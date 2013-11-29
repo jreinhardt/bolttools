@@ -94,6 +94,14 @@ class BOLTSRepository:
 						self.standardized[body][idx].replacedby = cl.name
 						break
 
+		#check for nonunique class ids
+		classids = []
+		for coll in self.collections:
+			for cl in coll.classes_by_ids():
+				if cl.id in classids:
+					raise NonUniqueClassIdError(cl.id)
+				classids.append(cl.id)
+
 class BOLTSCollection:
 	def __init__(self,coll):
 		check_schema(coll,"collection",
@@ -136,8 +144,12 @@ class BOLTSCollection:
 			raise MalformedCollectionError("No class in collection %s"% self.id)
 
 		self.classes = []
+		classids = []
 		for cl in coll["classes"]:
 			names = cl["id"]
+			if cl["id"] in classids:
+				raise NonUniqueClassIdError(cl["id"])
+			classids.append(cl["id"])
 			if "standard" in cl:
 				names = cl["standard"]
 			if isinstance(names,str):

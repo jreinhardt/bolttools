@@ -82,3 +82,8 @@ class NonUniqueBaseError(ParsingError):
 	def __init__(self,id):
 		ParsingError.__init__(self)
 		self.msg = "Encountered more than one base for class with id: %s" % id
+
+class NonUniqueClassIdError(ParsingError):
+	def __init__(self,id):
+		ParsingError.__init__(self)
+		self.msg = "Encountered more than one class with id: %s" % id
