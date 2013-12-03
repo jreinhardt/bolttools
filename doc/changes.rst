@@ -14,6 +14,7 @@ Changes of the BOLTS specifications
 * removed specifications of backends
 * moved infos about drawings into a separate database
 * added SolidWorks database
+* added sort field to tables
 
 
 

@@ -176,12 +176,18 @@ class BOLTSTable:
 	def __init__(self,table):
 		check_schema(table,"table",
 			["index","columns","data"],
-			[]
+			["sort"]
 		)
 
 		self.index = table["index"]
 		self.columns = table["columns"]
 		self.data = deepcopy(table["data"])
+
+		self.sort = self.columns[0]
+		if "sort" in table:
+			self.sort = table["sort"]
+			if not self.sort in self.columns:
+				raise SortNotInColumnsError(self.sort)
 
 	def _normalize_and_check_types(self,types):
 		numbers = ["Length (mm)", "Length (in)", "Number"]

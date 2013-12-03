@@ -91,6 +91,9 @@ class TestCollectionLoad(unittest.TestCase):
 		#negative value for parameter of type number
 		blt.BOLTSCollection(load_coll("test/data/table_error2.blt"))
 
+	def test_sort(self):
+		blt.BOLTSCollection(load_coll("test/data/sort.blt"))
+
 class TestBOLTSRepository(unittest.TestCase):
 	def test_empty(self):
 		self.assertRaises(MalformedCollectionError, lambda:
