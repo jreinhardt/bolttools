@@ -477,6 +477,28 @@ the following keys:
   These parameters allow to represent additional paramters, which are not
   specific to the class, but to the base. This allows e.g. to let the user
   choose  between a detailed and a schematic representation of the part.
+- connectors: optional, base-module-cs_. Informations about the connectors
+  attached to the part.
+
+.. _base-module-cs:
+
+Base module connectors
+======================
+
+A base-module-cs_ describes a set of local coordinate systems or connectors
+that are attached to specific points of the part to allow easy positioning.
+This is implemented by a OpenSCAD function that returns a coordinate system
+structure. This function has all the arguments of the module in which the
+base-module-cs_ is contained, and an additional argument "location" as the last
+argument. A base-module-cs_ is an associative array with the following keys:
+
+- name: mandatory, string. The name of the function that returns the
+  connectors.
+- arguments: mandatory, list of strings. A list with arguments that need to be
+  supplied to the connector function in the right order. Is a subset of the
+  parameters of the class and "location", the latter of which must be present.
+- locations: mandatory, list of strings. A list of possible values that can be
+  supplied for the argument "location" of the function.
 
 .. _base-file-type-stl:
 
