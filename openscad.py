@@ -45,7 +45,7 @@ class BaseModule(OpenSCADGeometry):
 	def __init__(self,mod,basefile,collname):
 		check_schema(mod,"basemodule",
 			["name", "arguments","classids"],
-			["parameters"])
+			["parameters","connectors"])
 		check_schema(basefile,"basemodule",
 			["filename","author","license","type","modules"],
 			["source"])
@@ -59,6 +59,10 @@ class BaseModule(OpenSCADGeometry):
 			self.parameters = BOLTSParameters(mod["parameters"])
 		else:
 			self.parameters = BOLTSParameters({})
+
+		self.connectors = None
+		if "connectors" in mod:
+			self.connectors = Connectors(mod["connectors"])
 
 	def get_copy_files(self):
 		return [self.path]
@@ -87,6 +91,17 @@ class BaseSTL(OpenSCADGeometry):
 		return []
 	def get_incantation(self,args):
 		return 'import("%s")' % join("base",self.filename)
+
+class Connectors:
+	def __init__(self,cs):
+		check_schema(cs,"connectors",
+			["name","arguments","locations"],
+			[])
+		self.name = cs["name"]
+		self.arguments = cs["arguments"]
+		if not "location" in self.arguments:
+			raise MissingLocationError(self.arguments)
+		self.locations = cs["locations"]
 
 
 class OpenSCADData(DataBase):
