@@ -111,8 +111,9 @@ class BOLTSParameters:
 
 		#common parameter combinations
 		discrete_types = ["Bool", "Table Index"]
-		self.common = []
+		self.common = None
 		if "common" in param:
+			self.common = []
 			for tup in param["common"]:
 				self._populate_common(tup,[],0)
 		else:
@@ -121,8 +122,12 @@ class BOLTSParameters:
 				if not self.types[pname] in discrete_types:
 					discrete = False
 					break
-			if discrete and len(self.free) > 0:
-				self._populate_common([":" for _i in range(len(self.free))],[],0)
+			if discrete:
+				self.common = []
+				if len(self.free) > 0:
+					self._populate_common([":" for _i in range(len(self.free))],[],0)
+				else:
+					self.common.append([])
 
 	def _populate_common(self, tup, values, idx):
 		if idx == len(self.free):
