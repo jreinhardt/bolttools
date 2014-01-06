@@ -120,7 +120,7 @@ class TestFreeCAD(unittest.TestCase):
 	def test_syntax(self):
 		fc = freecad.FreeCADData("test/syntax")
 		self.assertTrue("hexscrew1" in fc.getbase)
-		self.assertTrue("lack1" in fc.getbase)
+		self.assertFalse("lack1" in fc.getbase)
 		self.assertTrue("singlerowradialbearing" in fc.getbase)
 
 class TestDrawings(unittest.TestCase):
