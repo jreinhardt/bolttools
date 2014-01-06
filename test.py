@@ -66,6 +66,9 @@ class TestCollectionLoad(unittest.TestCase):
 		params = cl.parameters.collect({'key' : 'M2.5', 'l' : 37.4})
 		self.assertEqual(params['s'],12.0)
 
+		self.assertTrue("l" in cl.parameters.description)
+
+
 	def test_naming_error(self):
 		#wrong name for substitute field
 		self.assertRaises(UnknownFieldError, lambda:

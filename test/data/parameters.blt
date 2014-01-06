@@ -28,6 +28,9 @@ classes:
       free: [key,l]
       types:
         key: Table Index
+      description:
+        l: Length of the part from start to end
+        key: Thread size
       tables:
         index: key
         columns: [d1, d2, s]

@@ -213,6 +213,9 @@ restricted to be. The following keys are contained in a parameter element.
 - defaults: optional, associative array. This array contains a default value
   for every free parameter. If absent, the default value defaults to the type
   specific values given in the table below.
+- description: optional, associative array. This array contains short a short
+  text for each parameter clarifying the meaning of the parameter in plain
+  language.
 - common: optional, list of lists of (lists or strings). This field contains a
   list of tuples that contain valaues for all free parameters in the order in
   which they are given in the free field. These tuples are  represented by a

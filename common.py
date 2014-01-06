@@ -49,7 +49,7 @@ class BOLTSParameters:
 	def __init__(self,param):
 		check_schema(param,"parameters",
 			[],
-			["literal","free","tables","types","defaults","common"]
+			["literal","free","tables","types","defaults","common","description"]
 		)
 
 		self.literal = {}
@@ -71,6 +71,10 @@ class BOLTSParameters:
 		self.types = {}
 		if "types" in param:
 			self.types = param["types"]
+
+		self.description = {}
+		if "description" in param:
+			self.description = param["description"]
 
 		self.parameters = []
 		self.parameters += self.literal.keys()

@@ -16,6 +16,7 @@ Changes of the BOLTS specifications
 * added SolidWorks database
 * added sort field to tables
 * added syntax to specify connectors for OpenSCAD
+* added description field to Parameter element
 
 
 
