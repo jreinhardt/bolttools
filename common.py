@@ -95,6 +95,11 @@ class BOLTSParameters:
 			if not tname in all_types:
 				raise UnknownTypeError(tname)
 
+		#check description
+		for pname,tname in self.description.iteritems():
+			if not pname in self.parameters:
+				raise UnknownParameterError(pname)
+
 		#fill in defaults for types
 		for pname in self.parameters:
 			if not pname in self.types:
