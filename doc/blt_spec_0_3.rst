@@ -206,6 +206,9 @@ restricted to be. The following keys are contained in a parameter element.
 - tables: optional, table-element_ or list of table-elements. This array
   contains tabular data. Usually the table index will be a free variable, for
   details see table-element_ and parameter-collection_.
+- tables2d: optional, table2d-element_ or list of table2d-elements. This array
+  contains tabular data. Usually row and column indices will be free variables,
+  for details see table2d-element_ and parameter-collection_.
 - types: optional, associative array. Contains as keys parameter names, as
   values their respective types. Possible types are: "Length (mm)", Length
   (in)", "Number", "Bool", "Table Index", "String". If no entry is present for
@@ -260,13 +263,43 @@ keys:
   of type "Table Index" in the parameter-element_.
 - sort: optional, string: name of the parameter, which should be used for
   sorting the table when displaying it. Defaults to the first column.
-- columns: mandatory, list: list of parameter names corresponding to the
+- columns: mandatory, list of strings: list of parameter names corresponding to the
   columns of the table.
 - data: mandatory, associative array: The keys are possible values of the index
-  parameter, the values list of values compatible with the types of the
+  parameter, the values a list of values compatible with the types of the
   parameters specified in columns.
 
+.. _table2d-element:
+
+Table2D element
+---------------
+
+In some cases, a table-element_ is not powerful enough to represent the
+relationship between the values of free parameters and other parameters, for
+example if the value of a parameter depends on two free parameters at once.
+This case is covered by a table2d-element.
+
+A table2d-element allows to lookup the value of the result parameter for a row
+given by a rowindex and a column given by a colindex.
+
+A table2d-element_ is an associative array with the following keys:
+
+- rowindex: mandatory, string: name of the parameter that is used to select a
+  row. Has to be specified to be of type "Table Index" in the
+  parameter-element_.
+- colindex: mandatory, string: name of the parameter that is used to select a
+  column. Has to be specified to be of type "Table Index" in the
+  parameter-element_.
+- columns: mandatory, list of strings. The possible values for the colindex.
+- result: mandatory, string. The name of the parameter whose value is
+  determined with this table.
+- data: mandatory, associative array: The keys are possible values of the
+  rowindex parameter, the values a list of values for the columns from which
+  one is selected by the colindex.
+
+
 .. _naming-element:
+
 
 Naming element
 --------------
@@ -297,6 +330,9 @@ one or more parameter-element_:
 - The items of the free field.
 - The index field of the table-element_ s in the tables field.
 - The columns field of the table-element_ s in the tables field.
+- The rowindex field of the table2d-element_ s in the tables2d field
+- The colindex field of the table2d-element_ s in the tables2d field
+- The result field of the table2d-element_ s in the tables2d field
 
 It is an error condition if there is a parameter name present as a key in the
 types field, that is not in the set of all parameters.
@@ -306,11 +342,12 @@ Then a value is assigned to each parameter. This can happen by:
 - A literal value given in the literal field
 - User or external input for parameters listed in the free field
 - Table lookup for parameters listed in the columns field of a table-element_
+- Table2d lookup for parameters listed in the result field of a table2d-element_
 
-It is an error condition if a parameter is not assigned a value or if there are
+It is an error condition if a parameter is not assigned a value or if there is
 more than one way to assign a value.
 
-For example are the parameter values collected in this way used (among other
+The parameter values collected  in this way are for example used (among other
 properties) to populate the template given in the naming-element_.
 
 

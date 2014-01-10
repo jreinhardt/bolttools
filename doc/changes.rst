@@ -17,6 +17,7 @@ Changes of the BOLTS specifications
 * added sort field to tables
 * added syntax to specify connectors for OpenSCAD
 * added description field to Parameter element
+* added table2 2 dimensional lookup tables
 
 
 
