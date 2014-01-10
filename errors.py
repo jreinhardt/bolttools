@@ -63,6 +63,11 @@ class MalformedBaseError(ParsingError):
 		ParsingError.__init__(self)
 		self.msg = msg
 
+class MalformedStringError(ParsingError):
+	def __init__(self,msg):
+		ParsingError.__init__(self)
+		self.msg = msg
+
 class NonFreeDefaultError(ParsingError):
 	def __init__(self,pname):
 		ParsingError.__init__(self)

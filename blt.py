@@ -22,7 +22,7 @@ from os.path import splitext, exists, join
 from codecs import open
 
 from errors import *
-from common import BOLTSParameters, BOLTSNaming, RE_ANGLED, check_schema
+from common import BOLTSParameters, BOLTSNaming, parse_angled, check_schema
 
 CURRENT_VERSION = 0.3
 
@@ -130,14 +130,14 @@ class BOLTSCollection:
 		self.author_names = []
 		self.author_mails = []
 		for author in self.authors:
-			match = RE_ANGLED.match(author)
-			self.author_names.append(match.group(1).strip())
-			self.author_mails.append(match.group(2).strip())
+			match = parse_angled(author)
+			self.author_names.append(match[0])
+			self.author_mails.append(match[1])
 
 		self.license = coll["license"]
-		match = RE_ANGLED.match(self.license)
-		self.license_name = match.group(1).strip()
-		self.license_url = match.group(2).strip()
+		match = parse_angled(self.license)
+		self.license_name = match[0]
+		self.license_url = match[1]
 
 		#parse classes
 		if not isinstance(coll["classes"],list):

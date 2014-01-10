@@ -23,7 +23,13 @@ from copy import deepcopy
 
 from errors import *
 
-RE_ANGLED = re.compile("([^<]*)<([^>]*)")
+RE_ANGLED = re.compile("([^<]*)<([^>]*)>")
+
+def parse_angled(string):
+	match = RE_ANGLED.match(string)
+	if match is None:
+		raise MalformedStringError("Expected string containing <>")
+	return match.group(1).strip(), match.group(2).strip()
 
 def check_schema(yaml_dict, element_name, mandatory_fields, optional_fields):
 	#check dict from YAML parsing for correct and complete fields
@@ -270,14 +276,14 @@ class BaseElement:
 		self.author_names = []
 		self.author_mails = []
 		for author in self.authors:
-			match = RE_ANGLED.match(author)
-			self.author_names.append(match.group(1).strip())
-			self.author_mails.append(match.group(2).strip())
+			match = parse_angled(author)
+			self.author_names.append(match[0])
+			self.author_mails.append(match[1])
 
 		self.license = basefile["license"]
-		match = RE_ANGLED.match(self.license)
-		self.license_name = match.group(1).strip()
-		self.license_url = match.group(2).strip()
+		match = parse_angled(self.license)
+		self.license_name = match[0]
+		self.license_url = match[1]
 
 		self.type = basefile["type"]
 
