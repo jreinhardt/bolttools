@@ -193,14 +193,14 @@ class BOLTSParameters:
 		for pname,dname in self.defaults.iteritems():
 			res.defaults[pname] = dname
 		for pname,dname in other.defaults.iteritems():
-			if pname in res.types and self.defaults[pname] != dname:
+			if pname in res.defaults and self.defaults[pname] != dname:
 				raise IncompatibleDefaultError(pname,self.defaults[pname],dname)
 			res.defaults[pname] = dname
 
 		for pname,descr in self.description.iteritems():
 			res.description[pname] = descr
 		for pname,descr in other.description.iteritems():
-			if pname in res.types and self.description[pname] != descr:
+			if pname in res.description and self.description[pname] != descr:
 				raise IncompatibleDescriptionError(pname,self.description[pname],descr)
 			res.description[pname] = descr
 		return res
