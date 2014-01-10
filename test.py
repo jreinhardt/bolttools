@@ -97,6 +97,19 @@ class TestCollectionLoad(unittest.TestCase):
 	def test_sort(self):
 		blt.BOLTSCollection(load_coll("test/data/sort.blt"))
 
+	def test_parameter_union(self):
+		coll = blt.BOLTSCollection(load_coll("test/data/parameter_union.blt"))
+
+		cls = coll.classes
+
+		union = cls[0].parameters.union(cls[1].parameters)
+		self.assertRaises(IncompatibleTypeError, lambda:
+			cls[0].parameters.union(cls[2].parameters))
+		self.assertRaises(IncompatibleDefaultError, lambda:
+			cls[0].parameters.union(cls[3].parameters))
+		self.assertRaises(IncompatibleDescriptionError, lambda:
+			cls[0].parameters.union(cls[4].parameters))
+
 class TestBOLTSRepository(unittest.TestCase):
 	def test_empty(self):
 		self.assertRaises(MalformedCollectionError, lambda:

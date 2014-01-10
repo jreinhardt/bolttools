@@ -176,14 +176,27 @@ class BOLTSParameters:
 		res.free = self.free + other.free
 		res.tables = self.tables + other.tables
 		res.parameters = list(set(self.parameters))
+
 		for pname,tname in self.types.iteritems():
 			res.types[pname] = tname
 		for pname,tname in other.types.iteritems():
+			if pname in res.types and self.types[pname] != tname:
+				raise IncompatibleTypeError(pname,self.types[pname],tname)
 			res.types[pname] = tname
-		for pname,tname in self.defaults.iteritems():
-			res.defaults[pname] = tname
-		for pname,tname in other.defaults.iteritems():
-			res.defaults[pname] = tname
+
+		for pname,dname in self.defaults.iteritems():
+			res.defaults[pname] = dname
+		for pname,dname in other.defaults.iteritems():
+			if pname in res.types and self.defaults[pname] != dname:
+				raise IncompatibleDefaultError(pname,self.defaults[pname],dname)
+			res.defaults[pname] = dname
+
+		for pname,descr in self.description.iteritems():
+			res.description[pname] = descr
+		for pname,descr in other.description.iteritems():
+			if pname in res.types and self.description[pname] != descr:
+				raise IncompatibleDescriptionError(pname,self.description[pname],descr)
+			res.description[pname] = descr
 		return res
 
 class BOLTSTable:

@@ -97,3 +97,24 @@ class MissingLocationError(ParsingError):
 	def __init__(self,arguments):
 		ParsingError.__init__(self)
 		self.msg = "Argument list for coordinate system does not contain 'location': %s" % arguments
+
+class IncompatibleTypeError(Exception):
+	def __init__(self,pname,tname1,tname2):
+		Exception.__init__(self)
+		self.msg = "Type conflict on Parameter union for %s: %s is not %s" % (pname,tname1,tname2)
+	def __str__(self):
+		return self.msg
+
+class IncompatibleDefaultError(Exception):
+	def __init__(self,pname,dname1,dname2):
+		Exception.__init__(self)
+		self.msg = "Default value conflict on Parameter union for %s: %s is not %s" % (pname,dname1,dname2)
+	def __str__(self):
+		return self.msg
+
+class IncompatibleDescriptionError(Exception):
+	def __init__(self,pname,d1,d2):
+		Exception.__init__(self)
+		self.msg = "Description conflict on Parameter union for %s: %s is not %s" % (pname,d1,d2)
+	def __str__(self):
+		return self.msg
