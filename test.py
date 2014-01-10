@@ -86,6 +86,18 @@ class TestCollectionLoad(unittest.TestCase):
 			blt.BOLTSCollection(load_coll("test/data/type_error2.blt"))
 		)
 
+	def test_table2d(self):
+		coll = blt.BOLTSCollection(load_coll("test/data/table2d.blt"))
+		p = coll.classes[0].parameters
+
+		self.assertEqual(len(p.parameters),6)
+
+		res = p.collect({"key" : "M1.6", "thread_type" : "fine I", "l" : 20})
+		self.assertEqual(res["pitch_name"],"x0.2")
+
+		self.assertEqual(len(p.common),10)
+
+
 	def test_table_error(self):
 		#negative value for parameter of type length
 		self.assertRaises(ValueError, lambda:
