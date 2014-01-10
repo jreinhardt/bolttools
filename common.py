@@ -55,7 +55,7 @@ class BOLTSParameters:
 	def __init__(self,param):
 		check_schema(param,"parameters",
 			[],
-			["literal","free","tables","types","defaults","common","description"]
+			["literal","free","tables","tables2d","types","defaults","common","description"]
 		)
 
 		self.literal = {}
@@ -74,6 +74,14 @@ class BOLTSParameters:
 			else:
 				self.tables.append(BOLTSTable(param["tables"]))
 
+		self.tables2d = []
+		if "tables2d" in param:
+			if isinstance(param["tables2d"],list):
+				for table in param["tables2d"]:
+					self.tables2d.append(BOLTSTable2D(table))
+			else:
+				self.tables2d.append(BOLTSTable2D(param["tables2d"]))
+
 		self.types = {}
 		if "types" in param:
 			self.types = param["types"]
@@ -88,6 +96,10 @@ class BOLTSParameters:
 		for table in self.tables:
 			self.parameters.append(table.index)
 			self.parameters += table.columns
+		for table in self.tables2d:
+			self.parameters.append(table.rowindex)
+			self.parameters.append(table.colindex)
+			self.parameters.append(table.result)
 		#remove duplicates
 		self.parameters = list(set(self.parameters))
 
@@ -114,6 +126,14 @@ class BOLTSParameters:
 		#check and normalize tables
 		for table in self.tables:
 			table._normalize_and_check_types(self.types)
+			if self.types[table.index] != "Table Index":
+				raise ValueError("Parameter %s must be of type Table Index" % table.index)
+		for table in self.tables2d:
+			table._normalize_and_check_types(self.types)
+			if self.types[table.rowindex] != "Table Index":
+				raise ValueError("Parameter %s must be of type Table Index" % table.rowindex)
+			if self.types[table.colindex] != "Table Index":
+				raise ValueError("Parameter %s must be of type Table Index" % table.colindex)
 
 		#default values for free parameters
 		self.defaults = dict((pname,self.type_defaults[self.types[pname]])
@@ -153,11 +173,28 @@ class BOLTSParameters:
 					for v in [True, False]:
 						self._populate_common(tup,values + [v], idx+1)
 				elif self.types[self.free[idx]] == "Table Index":
+					#find smallest usable set of choices for this index
+					choices = None
 					for table in self.tables:
 						if self.free[idx] == table.index:
-							for v in table.data:
-								self._populate_common(tup,values + [v], idx+1)
-							break
+							if choices is None:
+								choices = set(table.data.keys())
+							else:
+								choices &= set(table.data.keys())
+					for table in self.tables2d:
+						if self.free[idx] == table.rowindex:
+							if choices is None:
+								choices = set(table.data.keys())
+							else:
+								choices &= set(table.data.keys())
+						elif self.free[idx] == table.colindex:
+							if choices is None:
+								choices = set(table.columns)
+							else:
+								choices &= set(table.columns)
+					#populate
+					for v in choices:
+						self._populate_common(tup,values + [v], idx+1)
 				else:
 					print "That should not happen"
 			else:
@@ -170,6 +207,9 @@ class BOLTSParameters:
 		res.update(free)
 		for table in self.tables:
 			res.update(dict(zip(table.columns,table.data[res[table.index]])))
+		for table in self.tables2d:
+			row = table.data[res[table.rowindex]]
+			res[table.result] = row[table.columns.index(res[table.colindex])]
 		for pname in self.parameters:
 			if not pname in res:
 				raise KeyError("Parameter value not collected: %s" % pname)
@@ -181,6 +221,7 @@ class BOLTSParameters:
 		res.literal.update(other.literal)
 		res.free = self.free + other.free
 		res.tables = self.tables + other.tables
+		res.tables2d = self.tables2d + other.tables2d
 		res.parameters = list(set(self.parameters))
 
 		for pname,tname in self.types.iteritems():
@@ -241,6 +282,46 @@ class BOLTSTable:
 					if tname in positive and row[i] < 0:
 						raise ValueError("Negative length in table: %f" % row[i])
 					if tname == "Bool":
+						if not row[i] in ["True","False"]:
+							raise ValueError("Unknown value for bool parameter: %s" % row[i])
+						row[i] = bool(row[i])
+
+class BOLTSTable2D:
+	def __init__(self,table):
+		check_schema(table,"table2d",
+			["rowindex","colindex","columns","result","data"],
+			[]
+		)
+
+		self.rowindex = table["rowindex"]
+		self.colindex = table["colindex"]
+		self.result = table["result"]
+		self.columns = table["columns"]
+		self.data = deepcopy(table["data"])
+
+		if self.rowindex == self.colindex:
+			raise ValueError("Row- and ColIndex are identical. In this case a ordinary table should be used.")
+
+	def _normalize_and_check_types(self,types):
+		numbers = ["Length (mm)", "Length (in)", "Number"]
+		positive = ["Length (mm)", "Length (in)"]
+		rest = ["Bool", "Table Index", "String"]
+		res_type = types[self.result]
+		for key in self.data:
+			row = self.data[key]
+			if len(row) != len(self.columns):
+				raise ValueError("Column is missing for row: %s" % key)
+			for i in range(len(self.columns)):
+				if row[i] == "None":
+					row[i] = None
+				else:
+					if res_type in numbers:
+						row[i] = float(row[i])
+					elif not res_type in rest:
+						raise ValueError("Unknown Type in table: %s" % res_type)
+					if res_type in positive and row[i] < 0:
+						raise ValueError("Negative length in table: %f" % row[i])
+					if res_type == "Bool":
 						if not row[i] in ["True","False"]:
 							raise ValueError("Unknown value for bool parameter: %s" % row[i])
 						row[i] = bool(row[i])
