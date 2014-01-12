@@ -97,6 +97,5 @@ classes:
                   M45:   [  76.95,   None  ]
                   M48:   [  82.60,   None  ]
                   M52:   [  88.25,   None  ]
-                  M64:   [  104.86,  None  ]
       source: http://almetal.nl/en/techinfo/hex/hd933.htm
 ...

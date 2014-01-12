@@ -93,11 +93,6 @@ class NonUniqueClassIdError(ParsingError):
 		ParsingError.__init__(self)
 		self.msg = "Encountered more than one class with id: %s" % id
 
-class SortNotInColumnsError(ParsingError):
-	def __init__(self,pname):
-		ParsingError.__init__(self)
-		self.msg = "The column specified by sort is not in table: %s" % pname
-
 class MissingLocationError(ParsingError):
 	def __init__(self,arguments):
 		ParsingError.__init__(self)

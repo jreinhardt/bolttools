@@ -106,9 +106,6 @@ class TestCollectionLoad(unittest.TestCase):
 		#negative value for parameter of type number
 		blt.BOLTSCollection(load_coll("test/data/table_error2.blt"))
 
-	def test_sort(self):
-		blt.BOLTSCollection(load_coll("test/data/sort.blt"))
-
 	def test_parameter_union(self):
 		coll = blt.BOLTSCollection(load_coll("test/data/parameter_union.blt"))
 
@@ -121,6 +118,8 @@ class TestCollectionLoad(unittest.TestCase):
 			cls[0].parameters.union(cls[3].parameters))
 		self.assertRaises(IncompatibleDescriptionError, lambda:
 			cls[0].parameters.union(cls[4].parameters))
+
+	
 
 class TestBOLTSRepository(unittest.TestCase):
 	def test_empty(self):
@@ -136,6 +135,17 @@ class TestBOLTSRepository(unittest.TestCase):
 	def test_syntax(self):
 		repo = blt.BOLTSRepository("test/syntax")
 		self.assertEqual(len(repo.collections),1)
+
+		#test sorting
+		for coll in repo.collections:
+			if coll.id != "multitable":
+				continue
+			for cl in coll.classes_by_ids():
+				if cl.id != "hexscrew1":
+					continue
+				self.assertFalse("M64" in cl.parameters.choices["key"])
+				self.assertTrue(cl.parameters.choices["key"][0] == "M1.6")
+				self.assertTrue(cl.parameters.choices["key"][-1] == "M52")
 
 class TestOpenSCAD(unittest.TestCase):
 	def test_syntax(self):

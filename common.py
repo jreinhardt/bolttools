@@ -43,6 +43,36 @@ def check_schema(yaml_dict, element_name, mandatory_fields, optional_fields):
 	if len(mandatory_fields) > 0:
 		raise MissingFieldError(element_name,mandatory_fields)
 
+class Sorting:
+	def __init__(self):
+		pass
+	def is_applicable(self,choices):
+		return False
+	def sort(self,choices):
+		return choices
+
+class Numerical(Sorting):
+	def __init__(self):
+		Sorting.__init__(self)
+		self.re = re.compile("[^0-9]*([0-9]+\.*[0-9]*)[^0-9]*$")
+	def is_applicable(self,choices):
+		for choice in choices:
+			if self.re.match(choice) is None:
+				return False
+		return True
+	def sort(self,choices):
+		return sorted(choices, key=lambda x: float(self.re.match(x).group(1)))
+
+class Alphabetical(Sorting):
+	def __init__(self):
+		Sorting.__init__(self)
+	def is_applicable(self,choices):
+		return True
+	def sort(self,choices):
+		return sorted(choices)
+
+SORTINGS = [Numerical(), Alphabetical()]
+
 class BOLTSParameters:
 	type_defaults = {
 		"Length (mm)" : 10,
@@ -135,6 +165,35 @@ class BOLTSParameters:
 			if self.types[table.colindex] != "Table Index":
 				raise ValueError("Parameter %s must be of type Table Index" % table.colindex)
 
+		#find the set of possible choices for every Table Index
+		self.choices = {}
+		for pname in self.free:
+			if not self.types[pname] == "Table Index":
+				continue
+			for table in self.tables:
+				if table.index == pname:
+					if not pname in self.choices:
+						self.choices[pname] = set(table.data.keys())
+					else:
+						self.choices[pname] &= set(table.data.keys())
+			for table in self.tables2d:
+				if table.rowindex == pname:
+					if not pname in self.choices:
+						self.choices[pname] = set(table.data.keys())
+					else:
+						self.choices[pname] &= set(table.data.keys())
+				elif table.colindex == pname:
+					if not pname in self.choices:
+						self.choices[pname] = set(table.columns)
+					else:
+						self.choices[pname] &= set(table.columns)
+		#figure out what the best way is to sort them
+		for pname in self.choices:
+			for sort in SORTINGS:
+				if sort.is_applicable(self.choices[pname]):
+					self.choices[pname] = sort.sort(self.choices[pname])
+					break
+
 		#default values for free parameters
 		self.defaults = dict((pname,self.type_defaults[self.types[pname]])
 			for pname in self.free)
@@ -173,27 +232,8 @@ class BOLTSParameters:
 					for v in [True, False]:
 						self._populate_common(tup,values + [v], idx+1)
 				elif self.types[self.free[idx]] == "Table Index":
-					#find smallest usable set of choices for this index
-					choices = None
-					for table in self.tables:
-						if self.free[idx] == table.index:
-							if choices is None:
-								choices = set(table.data.keys())
-							else:
-								choices &= set(table.data.keys())
-					for table in self.tables2d:
-						if self.free[idx] == table.rowindex:
-							if choices is None:
-								choices = set(table.data.keys())
-							else:
-								choices &= set(table.data.keys())
-						elif self.free[idx] == table.colindex:
-							if choices is None:
-								choices = set(table.columns)
-							else:
-								choices &= set(table.columns)
 					#populate
-					for v in choices:
+					for v in self.choices[self.free[idx]]:
 						self._populate_common(tup,values + [v], idx+1)
 				else:
 					print "That should not happen"
@@ -244,24 +284,33 @@ class BOLTSParameters:
 			if pname in res.description and self.description[pname] != descr:
 				raise IncompatibleDescriptionError(pname,self.description[pname],descr)
 			res.description[pname] = descr
+
+		res.choices = {}
+		for pname in self.choices:
+			res.choices[pname] = set(self.choices[pname])
+		for pname in other.choices:
+			if pname in res.choices:
+				res.choices[pname] &= set(other.choices[pname])
+			else:
+				res.choices[pname] = set(other.choices[pname])
+		sortings = [Numerical(), Alphabetical()]
+		for pname in res.choices:
+			for sort in SORTINGS:
+				if sort.is_applicable(res.choices[pname]):
+					res.choices[pname] = sort.sort(res.choices[pname])
+					break
 		return res
 
 class BOLTSTable:
 	def __init__(self,table):
 		check_schema(table,"table",
 			["index","columns","data"],
-			["sort"]
+			[]
 		)
 
 		self.index = table["index"]
 		self.columns = table["columns"]
 		self.data = deepcopy(table["data"])
-
-		self.sort = self.columns[0]
-		if "sort" in table:
-			self.sort = table["sort"]
-			if not self.sort in self.columns:
-				raise SortNotInColumnsError(self.sort)
 
 	def _normalize_and_check_types(self,types):
 		numbers = ["Length (mm)", "Length (in)", "Number"]
