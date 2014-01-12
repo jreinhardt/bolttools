@@ -261,8 +261,6 @@ keys:
 
 - index: mandatory, string: name of the index parameter. Has to specified to be
   of type "Table Index" in the parameter-element_.
-- sort: optional, string: name of the parameter, which should be used for
-  sorting the table when displaying it. Defaults to the first column.
 - columns: mandatory, list of strings: list of parameter names corresponding to the
   columns of the table.
 - data: mandatory, associative array: The keys are possible values of the index
