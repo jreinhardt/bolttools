@@ -320,6 +320,8 @@ class BOLTSTable:
 		idx = range(len(self.columns))
 		for key in self.data:
 			row = self.data[key]
+			if len(row) != len(self.columns):
+				raise ValueError("Column is missing for row: %s" % key)
 			for i,tname in zip(idx,col_types):
 				if row[i] == "None":
 					row[i] = None
