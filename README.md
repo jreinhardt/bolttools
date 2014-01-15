@@ -1,3 +1,10 @@
+Attention
+=========
+
+This repository is not in use anymore. Bolttools is now maintained in the tree of BOLTS:
+
+https://github.com/jreinhardt/BOLTS
+
 bolttools
 =========
 
